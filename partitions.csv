@@ -1,6 +1,6 @@
 # Name,   Type, SubType, Offset,  Size, Flags
-# Custom partition table for 4MB flash with SPIFFS
+# Custom partition table for 4MB flash with FileSystem
 nvs,      data, nvs,     ,        0x6000,
 phy_init, data, phy,     ,        0x1000,
 factory,  app,  factory, ,        1500K,
-spiffs,   data, spiffs,  ,        1500K,
+storage,  data, littlefs,,        1500K,

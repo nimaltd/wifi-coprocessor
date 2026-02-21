@@ -1,5 +1,5 @@
 
-# Default logging level used when building without changes in menuconfig.
+# --- DEBUG ----------------------------------------------------------
 # CONFIG_LOG_DEFAULT_LEVEL_NONE=y
 # CONFIG_LOG_DEFAULT_LEVEL_ERROR=y
 # CONFIG_LOG_DEFAULT_LEVEL_WARN=y
@@ -7,9 +7,13 @@ CONFIG_LOG_DEFAULT_LEVEL_INFO=y
 # CONFIG_LOG_DEFAULT_LEVEL_DEBUG=y
 # CONFIG_LOG_DEFAULT_LEVEL_VERBOSE=y
 
+# --- RTOS -----------------------------------------------------------
 CONFIG_FREERTOS_HZ=1000
+
+# --- OPTIMIZATION ---------------------------------------------------
 CONFIG_COMPILER_OPTIMIZATION_PERF=y
 
+# --- FLASH ----------------------------------------------------------
 CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
 CONFIG_ESPTOOLPY_FLASHMODE="qio"
 CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
@@ -17,6 +21,7 @@ CONFIG_ESPTOOLPY_FLASHFREQ="80m"
 CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
 CONFIG_ESPTOOLPY_FLASHSIZE="4MB"
 
+# --- PARTITION ------------------------------------------------------
 CONFIG_PARTITION_TABLE_CUSTOM=y
 CONFIG_PARTITION_TABLE_FILENAME="partitions.csv"
 CONFIG_PARTITION_TABLE_OFFSET=0x8000

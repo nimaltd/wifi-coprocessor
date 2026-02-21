@@ -18,12 +18,8 @@
  * Copyright (C) 2026 Nima Askari - NimaLTD. All rights reserved.
  */
 
-#include <stdio.h>
-#include "freertos/FreeRTOS.h"
+#include "freertos/FreeRTOS.h"  
 #include "freertos/task.h"
-#include "driver/gpio.h"
-#include "esp_log.h"
-#include "sdkconfig.h"
 #include "com.h"
 
 void app_main(void)

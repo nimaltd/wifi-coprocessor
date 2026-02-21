@@ -32,6 +32,6 @@
 void com_init(void)
 {
 	/* install UART driver for console/default UART */
-	uart_driver_install(CONFIG_CONSOLE_UART_NUM, 256, 0, 0, NULL, 0);
+	uart_driver_install(CONFIG_ESP_CONSOLE_UART_NUM, 0, 0, 0, NULL, 0);
 	ESP_LOGI(TAG, "initialized.");
 }   
