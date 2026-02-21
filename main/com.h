@@ -1,7 +1,7 @@
 
 /*
- * @file        main.c
- * @brief       main application entry point for the ESP32 HOST project.
+ * @file        com.h
+ * @brief       communication module for the ESP32 HOST project.
  * @author      Nima Askari
  * @version     1.0.0
  * @license     See the LICENSE file in the root folder.
@@ -18,15 +18,24 @@
  * Copyright (C) 2026 Nima Askari - NimaLTD. All rights reserved.
  */
 
+#ifndef _COM_H_
+#define _COM_H_
+
 #include <stdio.h>
-#include "freertos/FreeRTOS.h"
+#include "freertos/FreeRTOS.h"  
 #include "freertos/task.h"
 #include "driver/gpio.h"
-#include "esp_log.h"
+#include <driver/uart.h>
 #include "sdkconfig.h"
-#include "com.h"
+#include "esp_log.h"
 
-void app_main(void)
-{
-   com_init();
-}
+#ifdef __cplusplus
+extern "C" {    
+#endif
+
+void com_init(void);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+#endif /* _COM_H_ */

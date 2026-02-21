@@ -13,5 +13,6 @@
     "--background-index",
     "--query-driver=**",
     "--compile-commands-dir=e:\\GitHub\\esp32_host\\esp32_host\\build"
-  ]
+  ],
+  "idf.flashType": "UART"
 }

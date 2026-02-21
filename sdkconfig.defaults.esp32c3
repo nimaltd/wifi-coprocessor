@@ -43,3 +43,4 @@ CONFIG_COM_QSPI_SLAVE=n
 
 # Notes:
 # adapt pins if board uses them for other functions
+
