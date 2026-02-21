@@ -1,0 +1,46 @@
+# ===== esp32-c6_defaults =====
+
+# --- LED ------------------------------------------------------------
+CONFIG_LED_GPIO=2
+CONFIG_LED_ACTIVE_LEVEL=0
+
+# --- Interrupt ------------------------------------------------------
+CONFIG_IRQ_OUT_PIN=21
+CONFIG_IRQ_OUT_ACTIVE_LEVEL=0
+
+# --- UARTs ----------------------------------------------------------
+CONFIG_CONSOLE_UART_NUM=0
+CONFIG_COM_UART_NUM=1
+CONFIG_COM_USART_RX_PIN=16
+CONFIG_COM_USART_TX_PIN=17
+
+# --- SPI (generic slave interface) --------------------------------
+CONFIG_COM_SPI_SLAVE=y
+CONFIG_COM_SPI_MOSI_PIN=18
+CONFIG_COM_SPI_MISO_PIN=19
+CONFIG_COM_SPI_SCK_PIN=20
+CONFIG_COM_SPI_CS_PIN=21
+
+# --- SDIO (slave) --------------------------------------------------
+# ESP32-C6 supports SDIO slave controller
+CONFIG_COM_SDIO_SLAVE=y
+CONFIG_COM_SDIO_CMD_PIN=28
+CONFIG_COM_SDIO_CLK_PIN=29
+CONFIG_COM_SDIO_D0_PIN=30
+CONFIG_COM_SDIO_D1_PIN=31
+CONFIG_COM_SDIO_D2_PIN=32
+CONFIG_COM_SDIO_D3_PIN=33
+
+# --- QSPI (slave) ---------------------------------------------------
+# ESP32-C6 does not support QSPI slave; disable.
+CONFIG_COM_QSPI_SLAVE=n
+#CONFIG_COM_QSPI_IO0_PIN=
+#CONFIG_COM_QSPI_IO1_PIN=
+#CONFIG_COM_QSPI_IO2_PIN=
+#CONFIG_COM_QSPI_IO3_PIN=
+#CONFIG_COM_QSPI_SCK_PIN=
+#CONFIG_COM_QSPI_CS_PIN=
+
+# Notes:
+# adapt pins if board uses them for other functions
+
