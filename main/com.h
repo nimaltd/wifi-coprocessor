@@ -25,13 +25,27 @@
 #include "freertos/FreeRTOS.h"  
 #include "freertos/task.h"
 #include "driver/gpio.h"
-#include <driver/uart.h>
 #include "sdkconfig.h"
 #include "esp_log.h"
+#if CONFIG_COM_UART_ENABLE
+#include "driver/uart.h"
+#endif
+#if CONFIG_COM_SPI_ENABLE
+#include "driver/spi_slave.h"  
+#endif
+#if CONFIG_COM_SDIO_ENABLE
+#include "driver/sdio_slave.h"
+#endif
+#if CONFIG_COM_QSPI_ENABLE
+#include "driver/qspi_slave.h"  
+#endif
 
 #ifdef __cplusplus
 extern "C" {    
 #endif
+
+#define COM_FRAME_SIZE          2048
+#define COM_FRAME_QUEUE_SIZE    10
 
 void com_init(void);
 

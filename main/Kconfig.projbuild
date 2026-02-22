@@ -4,8 +4,8 @@ menu "Board Configuration"
 # ===== LED ==========================================================
 menu "LED Configuration"
 
-config LED_GPIO
-    int "LED GPIO"
+config LED_PIN
+    int "LED PIN"
     range 0 48
     default 0
 
@@ -36,20 +36,33 @@ endmenu
 # ===== UART =========================================================
 menu "UART Communication"
 
+config COM_UART_ENABLE
+    bool "Enable UART Interface"
+    default n
+
+if COM_UART_ENABLE
+
 config COM_UART_NUM
     int "UART Port Number"
     range 0 2
     default 0
 
-config COM_USART_RX_PIN
+config COM_UART_BAUD
+    int "UART Baud Rate"
+    range 0 2000000
+    default 115200
+
+config COM_UART_RX_PIN
     int "UART RX GPIO"
     range 0 48
     default 0
 
-config COM_USART_TX_PIN
+config COM_UART_TX_PIN
     int "UART TX GPIO"
     range 0 48
     default 0
+
+endif
 
 endmenu
 
@@ -57,11 +70,11 @@ endmenu
 # ===== SPI ==========================================================
 menu "SPI Slave Interface"
 
-config COM_SPI_SLAVE
+config COM_SPI_ENABLE
     bool "Enable SPI Slave Interface"
     default n
 
-if COM_SPI_SLAVE
+if COM_SPI_ENABLE
 
 config COM_SPI_NUM
     int "SPI Host Number"
@@ -96,11 +109,11 @@ endmenu
 # ===== SDIO =========================================================
 menu "SDIO Slave Interface"
 
-config COM_SDIO_SLAVE
+config COM_SDIO_ENABLE
     bool "Enable SDIO Slave"
     default n
 
-if COM_SDIO_SLAVE
+if COM_SDIO_ENABLE
 
 config COM_SDIO_CLK_PIN
     int "SDIO CLK GPIO"
@@ -140,11 +153,11 @@ endmenu
 # ===== QSPI =========================================================
 menu "QSPI Slave Interface"
 
-config COM_QSPI_SLAVE
+config COM_QSPI_ENABLE
     bool "Enable QSPI Slave"
     default n
 
-if COM_QSPI_SLAVE
+if COM_QSPI_ENABLE
 
 config COM_QSPI_CS_PIN
     int "QSPI CS GPIO"

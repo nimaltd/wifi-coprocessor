@@ -22,6 +22,11 @@
 
 #define TAG "COM" 
 
+#if CONFIG_COM_UART_ENABLE
+static QueueHandle_t com_uart_queue;
+#endif
+
+
 /**********************************************************************************************************/
 /**
  * @brief   Initializes the communication module.
@@ -31,7 +36,60 @@
  */
 void com_init(void)
 {
-	/* install UART driver for console/default UART */
-	uart_driver_install(CONFIG_ESP_CONSOLE_UART_NUM, 0, 0, 0, NULL, 0);
+    gpio_config_t io_conf = {};
+
+	/* LED initialization */
+	gpio_set_level(CONFIG_LED_PIN, !CONFIG_LED_ACTIVE_LEVEL);
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_OUTPUT;
+    io_conf.pin_bit_mask = 1ULL << CONFIG_LED_PIN;
+    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+    gpio_config(&io_conf);
+
+	/* IRQ-OUT initialization */
+	gpio_set_level(CONFIG_IRQ_OUT_PIN, !CONFIG_IRQ_OUT_ACTIVE_LEVEL);
+	io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_OUTPUT;
+    io_conf.pin_bit_mask = 1ULL << CONFIG_IRQ_OUT_PIN;
+    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+    gpio_config(&io_conf);
+
+#if CONFIG_COM_UART_ENABLE
+	/* UART initialization */
+	uart_config_t uart_config =
+	{
+		.baud_rate = CONFIG_COM_UART_BAUD,
+		.data_bits = UART_DATA_8_BITS,
+		.parity = UART_PARITY_DISABLE,
+		.stop_bits = UART_STOP_BITS_1,
+		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+		.source_clk = UART_SCLK_DEFAULT,
+	};
+
+	ESP_ERROR_CHECK(uart_param_config(CONFIG_COM_UART_NUM, &uart_config));
+	ESP_ERROR_CHECK(uart_set_pin(CONFIG_COM_UART_NUM, CONFIG_COM_UART_TX_PIN, CONFIG_COM_UART_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+	ESP_ERROR_CHECK(uart_driver_install(CONFIG_COM_UART_NUM, COM_FRAME_SIZE, COM_FRAME_SIZE, COM_FRAME_QUEUE_SIZE, &com_uart_queue, 0));
+
+	uart_write_bytes(CONFIG_COM_UART_NUM, "UART initialized.\n", strlen("UART initialized.\n"));
+
+#endif
+
+#if CONFIG_COM_SPI_ENABLE
+	/* SPI initialization */
+
+#endif
+
+#if CONFIG_COM_SDIO_ENABLE
+	/* SDIO initialization */
+
+#endif
+
+#if CONFIG_COM_QSPI_ENABLE
+	/* QSPI initialization */		
+
+#endif
+
 	ESP_LOGI(TAG, "initialized.");
 }   

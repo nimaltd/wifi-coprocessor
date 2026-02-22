@@ -20,9 +20,13 @@
 
 #include "freertos/FreeRTOS.h"  
 #include "freertos/task.h"
+#include "sdkconfig.h"
+#include "esp_log.h"
 #include "com.h"
 
 void app_main(void)
 {
+   /* install UART driver for console/default UART */
+	uart_driver_install(CONFIG_ESP_CONSOLE_UART_NUM, 256, 256, 0, NULL, 0);
    com_init();
 }
