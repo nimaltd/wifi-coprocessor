@@ -22,10 +22,9 @@
 
 #define TAG "COM" 
 
-#if CONFIG_COM_UART_ENABLE
-static QueueHandle_t com_uart_queue;
-#endif
+static QueueHandle_t com_queue;
 
+static void com_task(void *arg);
 
 /**********************************************************************************************************/
 /**
@@ -56,7 +55,7 @@ void com_init(void)
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
     gpio_config(&io_conf);
 
-#if CONFIG_COM_UART_ENABLE
+#if CONFIG_COM_UART
 	/* UART initialization */
 	uart_config_t uart_config =
 	{
@@ -68,28 +67,40 @@ void com_init(void)
 		.source_clk = UART_SCLK_DEFAULT,
 	};
 
-	ESP_ERROR_CHECK(uart_param_config(CONFIG_COM_UART_NUM, &uart_config));
-	ESP_ERROR_CHECK(uart_set_pin(CONFIG_COM_UART_NUM, CONFIG_COM_UART_TX_PIN, CONFIG_COM_UART_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-	ESP_ERROR_CHECK(uart_driver_install(CONFIG_COM_UART_NUM, COM_FRAME_SIZE, COM_FRAME_SIZE, COM_FRAME_QUEUE_SIZE, &com_uart_queue, 0));
-
-	uart_write_bytes(CONFIG_COM_UART_NUM, "UART initialized.\n", strlen("UART initialized.\n"));
+	ESP_ERROR_CHECK(uart_driver_install(CONFIG_COM_UART_NUM, COM_FRAME_SIZE, COM_FRAME_SIZE,
+		COM_FRAME_QUEUE_SIZE, &com_queue, 0));
+	ESP_ERROR_CHECK(uart_param_config(CONFIG_COM_UART_NUM, &uart_config));	
+	ESP_ERROR_CHECK(uart_set_pin(CONFIG_COM_UART_NUM, CONFIG_COM_UART_TX_PIN, CONFIG_COM_UART_RX_PIN,
+		UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+	
 
 #endif
 
-#if CONFIG_COM_SPI_ENABLE
+#if CONFIG_COM_SPI
 	/* SPI initialization */
+	
 
 #endif
 
-#if CONFIG_COM_SDIO_ENABLE
-	/* SDIO initialization */
-
-#endif
-
-#if CONFIG_COM_QSPI_ENABLE
+#if CONFIG_COM_QSPI
 	/* QSPI initialization */		
 
 #endif
 
+	xTaskCreate(com_task, "com_task", COM_TASK_STACK_SIZE, NULL, COM_TASK_PRIORITY, NULL);
 	ESP_LOGI(TAG, "initialized.");
 }   
+
+
+static void com_task(void *arg)
+{
+	uint8_t *data = (uint8_t *) malloc(COM_FRAME_SIZE);
+	while (1)
+	{
+		int len = uart_read_bytes(CONFIG_COM_UART_NUM, data, (COM_FRAME_SIZE - 1), 1);
+		if (len > 0)
+		{
+			ESP_LOGI(TAG, "Received %d bytes", len);
+		}
+	}
+}

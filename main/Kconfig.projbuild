@@ -1,196 +1,118 @@
-
 menu "Board Configuration"
 
-# ===== LED ==========================================================
-menu "LED Configuration"
+    # ===== LED ==========================================================
+    menu "LED Configuration"
+        config LED_PIN
+            int "LED PIN"
+            range 0 48
+            default 0
+        config LED_ACTIVE_LEVEL
+            int "LED Active Level (0=Low, 1=High)"
+            range 0 1
+            default 0
+    endmenu
 
-config LED_PIN
-    int "LED PIN"
-    range 0 48
-    default 0
+    # ===== Interrupt ====================================================
+    menu "Interrupt Output"
+        config IRQ_OUT_PIN
+            int "IRQ Output GPIO"
+            range 0 48
+            default 0
+        config IRQ_OUT_ACTIVE_LEVEL
+            int "IRQ Active Level (0=Low, 1=High)"
+            range 0 1
+            default 0
+    endmenu
 
-config LED_ACTIVE_LEVEL
-    int "LED Active Level (0=Low, 1=High)"
-    range 0 1
-    default 0
+    # ===== PHY SELECTION ================================================
+    choice COM_SELECTED_PHY
+        prompt "Select Active Communication PHY"
+        default COM_UART
+        help
+            Choose which physical interface your code should initialize.
 
-endmenu
+        config COM_UART
+            bool "UART Interface"
+        config COM_SPI
+            bool "SPI Slave Interface"
+        config COM_QSPI
+            bool "QSPI Slave Interface"
+    endchoice
 
+    # ===== UART =========================================================
+    menu "UART Communication"
+        config COM_UART_NUM
+            int "UART Number"
+            range 0 2
+            default 0
+        config COM_UART_BAUD
+            int "UART Baud Rate"
+            range 0 4000000
+            default 115200
+        config COM_UART_RX_PIN
+            int "UART RX GPIO"
+            range 0 48
+            default 0
+        config COM_UART_TX_PIN
+            int "UART TX GPIO"
+            range 0 48
+            default 0
+    endmenu
 
-# ===== Interrupt ====================================================
-menu "Interrupt Output"
+    # ===== SPI ==========================================================
+    menu "SPI Slave Interface"
+        config COM_SPI_NUM
+            int "SPI Number"
+            range 0 3
+            default 0
+        config COM_SPI_MOSI_PIN
+            int "SPI MOSI GPIO"
+            range 0 48
+            default 0
+        config COM_SPI_MISO_PIN
+            int "SPI MISO GPIO"
+            range 0 48
+            default 0
+        config COM_SPI_SCK_PIN
+            int "SPI SCK GPIO"
+            range 0 48
+            default 0
+        config COM_SPI_CS_PIN
+            int "SPI CS GPIO"
+            range 0 48
+            default 0
+    endmenu
 
-config IRQ_OUT_PIN
-    int "IRQ Output GPIO"
-    range 0 48
-    default 0
-
-config IRQ_OUT_ACTIVE_LEVEL
-    int "IRQ Active Level (0=Low, 1=High)"
-    range 0 1
-    default 0
-
-endmenu
-
-
-# ===== UART =========================================================
-menu "UART Communication"
-
-config COM_UART_ENABLE
-    bool "Enable UART Interface"
-    default n
-
-if COM_UART_ENABLE
-
-config COM_UART_NUM
-    int "UART Port Number"
-    range 0 2
-    default 0
-
-config COM_UART_BAUD
-    int "UART Baud Rate"
-    range 0 2000000
-    default 115200
-
-config COM_UART_RX_PIN
-    int "UART RX GPIO"
-    range 0 48
-    default 0
-
-config COM_UART_TX_PIN
-    int "UART TX GPIO"
-    range 0 48
-    default 0
-
-endif
-
-endmenu
-
-
-# ===== SPI ==========================================================
-menu "SPI Slave Interface"
-
-config COM_SPI_ENABLE
-    bool "Enable SPI Slave Interface"
-    default n
-
-if COM_SPI_ENABLE
-
-config COM_SPI_NUM
-    int "SPI Host Number"
-    range 0 3
-    default 0
-
-config COM_SPI_MOSI_PIN
-    int "SPI MOSI GPIO"
-    range 0 48
-    default 0
-
-config COM_SPI_MISO_PIN
-    int "SPI MISO GPIO"
-    range 0 48
-    default 0
-
-config COM_SPI_SCK_PIN
-    int "SPI SCK GPIO"
-    range 0 48
-    default 0
-
-config COM_SPI_CS_PIN
-    int "SPI CS GPIO"
-    range 0 48
-    default 0
-
-endif
-
-endmenu
-
-
-# ===== SDIO =========================================================
-menu "SDIO Slave Interface"
-
-config COM_SDIO_ENABLE
-    bool "Enable SDIO Slave"
-    default n
-
-if COM_SDIO_ENABLE
-
-config COM_SDIO_CLK_PIN
-    int "SDIO CLK GPIO"
-    range 0 48
-    default 0
-
-config COM_SDIO_CMD_PIN
-    int "SDIO CMD GPIO"
-    range 0 48
-    default 0
-
-config COM_SDIO_D0_PIN
-    int "SDIO D0 GPIO"
-    range 0 48
-    default 0
-
-config COM_SDIO_D1_PIN
-    int "SDIO D1 GPIO"
-    range 0 48
-    default 0
-
-config COM_SDIO_D2_PIN
-    int "SDIO D2 GPIO"
-    range 0 48
-    default 0
-
-config COM_SDIO_D3_PIN
-    int "SDIO D3 GPIO"
-    range 0 48
-    default 0
-
-endif
-
-endmenu
-
-
-# ===== QSPI =========================================================
-menu "QSPI Slave Interface"
-
-config COM_QSPI_ENABLE
-    bool "Enable QSPI Slave"
-    default n
-
-if COM_QSPI_ENABLE
-
-config COM_QSPI_CS_PIN
-    int "QSPI CS GPIO"
-    range 0 48
-    default 0
-
-config COM_QSPI_SCK_PIN
-    int "QSPI SCK GPIO"
-    range 0 48
-    default 0
-
-config COM_QSPI_IO0_PIN
-    int "QSPI IO0 GPIO"
-    range 0 48
-    default 0
-
-config COM_QSPI_IO1_PIN
-    int "QSPI IO1 GPIO"
-    range 0 48
-    default 0
-
-config COM_QSPI_IO2_PIN
-    int "QSPI IO2 GPIO"
-    range 0 48
-    default 0
-
-config COM_QSPI_IO3_PIN
-    int "QSPI IO3 GPIO"
-    range 0 48
-    default 0
-
-endif
-
-endmenu
+    # ===== QSPI =========================================================
+    menu "QSPI Slave Interface"
+        config COM_QSPI_NUM
+            int "QSPI Number"
+            range 0 3
+            default 0
+        config COM_QSPI_CS_PIN
+            int "QSPI CS GPIO"
+            range 0 48
+            default 0
+        config COM_QSPI_SCK_PIN
+            int "QSPI SCK GPIO"
+            range 0 48
+            default 0
+        config COM_QSPI_IO0_PIN
+            int "QSPI IO0 GPIO"
+            range 0 48
+            default 0
+        config COM_QSPI_IO1_PIN
+            int "QSPI IO1 GPIO"
+            range 0 48
+            default 0
+        config COM_QSPI_IO2_PIN
+            int "QSPI IO2 GPIO"
+            range 0 48
+            default 0
+        config COM_QSPI_IO3_PIN
+            int "QSPI IO3 GPIO"
+            range 0 48
+            default 0
+    endmenu
 
 endmenu

@@ -27,17 +27,11 @@
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 #include "esp_log.h"
-#if CONFIG_COM_UART_ENABLE
+#if CONFIG_COM_UART
 #include "driver/uart.h"
 #endif
-#if CONFIG_COM_SPI_ENABLE
+#if CONFIG_COM_SPI | CONFIG_COM_QSPI
 #include "driver/spi_slave.h"  
-#endif
-#if CONFIG_COM_SDIO_ENABLE
-#include "driver/sdio_slave.h"
-#endif
-#if CONFIG_COM_QSPI_ENABLE
-#include "driver/qspi_slave.h"  
 #endif
 
 #ifdef __cplusplus
@@ -46,6 +40,8 @@ extern "C" {
 
 #define COM_FRAME_SIZE          2048
 #define COM_FRAME_QUEUE_SIZE    10
+#define COM_TASK_STACK_SIZE     4096
+#define COM_TASK_PRIORITY       10
 
 void com_init(void);
 

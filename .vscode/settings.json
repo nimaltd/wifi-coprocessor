@@ -1,12 +1,12 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
   "idf.openOcdConfigs": [
-    "board/esp32-wrover-kit-3.3v.cfg"
+    "board/esp32c5-builtin.cfg"
   ],
-  "idf.portWin": "COM4",
+  "idf.portWin": "COM7",
   "idf.currentSetup": "C:\\esp\\v5.5.3\\esp-idf",
   "idf.customExtraVars": {
-    "IDF_TARGET": "esp32"
+    "IDF_TARGET": "esp32c5"
   },
   "clangd.path": "C:\\Espressif\\tools\\esp-clang\\esp-19.1.2_20250312\\esp-clang\\bin\\clangd.exe",
   "clangd.arguments": [
