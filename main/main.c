@@ -22,6 +22,7 @@
 #include "freertos/task.h"
 #include "sdkconfig.h"
 #include "esp_log.h"
+#include "driver/uart.h"
 #include "com.h"
 
 void app_main(void)

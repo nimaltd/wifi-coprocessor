@@ -21,29 +21,73 @@
 #ifndef _COM_H_
 #define _COM_H_
 
+#ifdef __cplusplus
+extern "C" {    
+#endif
+
+/*
+ * ********************************************************************************************************
+ * INCLUDES
+ * ********************************************************************************************************
+*/
+
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"  
 #include "freertos/task.h"
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 #include "esp_log.h"
-#if CONFIG_COM_UART
-#include "driver/uart.h"
-#endif
-#if CONFIG_COM_SPI | CONFIG_COM_QSPI
 #include "driver/spi_slave.h"  
-#endif
 
-#ifdef __cplusplus
-extern "C" {    
-#endif
+/*
+ * ********************************************************************************************************
+ * DEFINES
+ * ********************************************************************************************************
+*/
 
 #define COM_FRAME_SIZE          2048
 #define COM_FRAME_QUEUE_SIZE    10
 #define COM_TASK_STACK_SIZE     4096
 #define COM_TASK_PRIORITY       10
 
+/*
+ * ********************************************************************************************************
+ * TYPES
+ * ********************************************************************************************************
+*/
+
+/* Communication mode */
+typedef enum
+{
+    COM_MODE_SPI,
+    COM_MODE_QSPI
+
+} com_mode_t;
+
+/* Communication structure */
+typedef struct
+{
+    com_mode_t mode;
+
+    uint8_t tx_data[COM_FRAME_SIZE];
+    uint8_t rx_data[COM_FRAME_SIZE];
+    size_t length;
+
+} com_t;
+
+/*
+ * ********************************************************************************************************
+ * FUNCTION PROTOTYPES
+ * ********************************************************************************************************
+*/
+
 void com_init(void);
+
+/*
+ * ********************************************************************************************************
+ * END
+ * ********************************************************************************************************
+*/
 
 #ifdef __cplusplus
 } /* extern "C" */

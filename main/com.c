@@ -16,15 +16,46 @@
  * @instagram   https://instagram.com/github.nimaltd
  *
  * Copyright (C) 2026 Nima Askari - NimaLTD. All rights reserved.
- */
+*/
+
+/*
+ * ********************************************************************************************************
+ * INCLUDES
+ * ********************************************************************************************************
+*/
 
 #include "com.h"
 
+/*
+ * ********************************************************************************************************
+ * DEFINES
+ * ********************************************************************************************************
+*/
+
 #define TAG "COM" 
 
+/*
+ * ********************************************************************************************************
+ * VARIABLES
+ * ********************************************************************************************************
+*/
+
 static QueueHandle_t com_queue;
+static com_t com = {0};
+
+/*
+ * ********************************************************************************************************
+ * PRIVATE FUNCTION PROTOTYPES
+ * ********************************************************************************************************
+*/
 
 static void com_task(void *arg);
+
+/*
+ * ********************************************************************************************************
+ * FUNCTIONS IMPLEMENTATION
+ * ********************************************************************************************************
+*/
 
 /**********************************************************************************************************/
 /**
@@ -35,9 +66,9 @@ static void com_task(void *arg);
  */
 void com_init(void)
 {
-    gpio_config_t io_conf = {};
+    gpio_config_t io_conf = {0};
 
-	/* LED initialization */
+	/* LED PIN initialization */
 	gpio_set_level(CONFIG_LED_PIN, !CONFIG_LED_ACTIVE_LEVEL);
     io_conf.intr_type = GPIO_INTR_DISABLE;
     io_conf.mode = GPIO_MODE_OUTPUT;
@@ -46,8 +77,8 @@ void com_init(void)
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
     gpio_config(&io_conf);
 
-	/* IRQ-OUT initialization */
-	gpio_set_level(CONFIG_IRQ_OUT_PIN, !CONFIG_IRQ_OUT_ACTIVE_LEVEL);
+	/* IRQ-OUT PIN initialization */
+	gpio_set_level(CONFIG_IRQ_OUT_PIN, 0);
 	io_conf.intr_type = GPIO_INTR_DISABLE;
     io_conf.mode = GPIO_MODE_OUTPUT;
     io_conf.pin_bit_mask = 1ULL << CONFIG_IRQ_OUT_PIN;
@@ -55,52 +86,58 @@ void com_init(void)
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
     gpio_config(&io_conf);
 
-#if CONFIG_COM_UART
-	/* UART initialization */
-	uart_config_t uart_config =
+	/* MODE PIN initialization */
+	io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_INPUT;
+    io_conf.pin_bit_mask = 1ULL << CONFIG_MODE_PIN;
+    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+    gpio_config(&io_conf);
+
+	if (gpio_get_level(CONFIG_MODE_PIN) == 1)
 	{
-		.baud_rate = CONFIG_COM_UART_BAUD,
-		.data_bits = UART_DATA_8_BITS,
-		.parity = UART_PARITY_DISABLE,
-		.stop_bits = UART_STOP_BITS_1,
-		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-		.source_clk = UART_SCLK_DEFAULT,
-	};
+		
+		ESP_LOGI(TAG, "Operating in SPI mode");
+	}
+	else
+	{
+		ESP_LOGI(TAG, "Operating in QSPI mode");
+	}
 
-	ESP_ERROR_CHECK(uart_driver_install(CONFIG_COM_UART_NUM, COM_FRAME_SIZE, COM_FRAME_SIZE,
-		COM_FRAME_QUEUE_SIZE, &com_queue, 0));
-	ESP_ERROR_CHECK(uart_param_config(CONFIG_COM_UART_NUM, &uart_config));	
-	ESP_ERROR_CHECK(uart_set_pin(CONFIG_COM_UART_NUM, CONFIG_COM_UART_TX_PIN, CONFIG_COM_UART_RX_PIN,
-		UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-	
+	/* MODE PIN de-initialization */
+	io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_INPUT;
+    io_conf.pin_bit_mask = 1ULL << CONFIG_MODE_PIN;
+    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+    gpio_config(&io_conf);
 
-#endif
-
-#if CONFIG_COM_SPI
-	/* SPI initialization */
-	
-
-#endif
-
-#if CONFIG_COM_QSPI
-	/* QSPI initialization */		
-
-#endif
+	/* To indicate initialization is complete */
+	gpio_set_level(CONFIG_IRQ_OUT_PIN, 1);
 
 	xTaskCreate(com_task, "com_task", COM_TASK_STACK_SIZE, NULL, COM_TASK_PRIORITY, NULL);
 	ESP_LOGI(TAG, "initialized.");
 }   
 
+/*
+ * ********************************************************************************************************
+ * PRIVATE FUNCTION IMPLEMENTATION
+ * ********************************************************************************************************
+*/
 
+/**********************************************************************************************************/
+/**
+ * @brief   Communication task that handles incoming data and events.
+ * @details This task runs in the background and processes communication events
+ * 		such as receiving data from UART, SPI, or QSPI. It can also handle timeouts and other communication-related events.
+ * @param   arg: Task argument (not used)
+ * @return  None
+ */
 static void com_task(void *arg)
 {
-	uint8_t *data = (uint8_t *) malloc(COM_FRAME_SIZE);
+	
 	while (1)
 	{
-		int len = uart_read_bytes(CONFIG_COM_UART_NUM, data, (COM_FRAME_SIZE - 1), 1);
-		if (len > 0)
-		{
-			ESP_LOGI(TAG, "Received %d bytes", len);
-		}
+		vTaskDelay(pdMS_TO_TICKS(1000));
 	}
 }
