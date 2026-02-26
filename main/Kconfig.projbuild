@@ -16,13 +16,6 @@ menu "Board Configuration"
         int "IRQ Output GPIO"
         default 3
 
-    # ===== Mode Selection ===================================================
-    config MODE_PIN
-        int "Hardware Mode Selection GPIO"
-        default 13
-        help
-            Float or High (1) = SPI Mode, Low (0) = Standard QSPI Mode.
-
     # ===== SPI/QSPI Pins ===================================================
     menu "SPI/QSPI Pins"
         config COM_SPI_SCK_PIN
@@ -43,6 +36,16 @@ menu "Board Configuration"
         config COM_SPI_D3_PIN
             int "D3 GPIO"
             default 9
+    endmenu
+
+    # ===== WiFi ========================================================
+    menu "WiFi Configuration"
+        config ESP_PHY_MAX_WIFI_TX_POWER
+            int "Maximum WiFi TX Power (dBm)"
+            range 0 20
+            default 20
+            help
+                Set maximum WiFi transmit power in dBm (0-20 dBm)
     endmenu
 
 endmenu

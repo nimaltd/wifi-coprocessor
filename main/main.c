@@ -29,5 +29,12 @@ void app_main(void)
 {
    /* install UART driver for console/default UART */
 	uart_driver_install(CONFIG_ESP_CONSOLE_UART_NUM, 256, 256, 0, NULL, 0);
+
+   printf("\n========================================\n");
+   printf("ESP32 HOST - Version %s\n", PROJECT_VER);
+   printf("https://www.github.com/nimaltd\n");
+   printf("========================================\n\n");
+
+   /* Initialize communication module */
    com_init();
 }

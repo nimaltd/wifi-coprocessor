@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 # Set the project version
-set(PROJECT_VER "0.0.1")
+set(PROJECT_VER "0.1.0")
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 # "Trim" the build. Include the minimal set of components, main, and anything it depends on.

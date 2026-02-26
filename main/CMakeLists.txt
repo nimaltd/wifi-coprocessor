@@ -4,6 +4,7 @@ idf_component_register(
     SRCS 
         "main.c"
         "com.c"
+        "com_queue.c"
 
     INCLUDE_DIRS 
         "."
@@ -18,5 +19,8 @@ idf_component_register(
         esp_wifi
         nvs_flash
 )
+
+# Add project version to compile definitions
+target_compile_definitions(${COMPONENT_LIB} PRIVATE PROJECT_VER="${PROJECT_VER}")
 
 # littlefs_create_partition_image(storage ../flash_data FLASH_IN_PROJECT)

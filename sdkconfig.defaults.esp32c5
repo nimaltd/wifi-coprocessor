@@ -6,9 +6,6 @@ CONFIG_LED_ACTIVE_LEVEL=0
 # --- Interrupt ----
 CONFIG_IRQ_OUT_PIN=3
 
-# --- MODE ----
-CONFIG_MODE_PIN=13
-
 # --- SPI ----------      
 CONFIG_COM_SPI_SCK_PIN=0       
 CONFIG_COM_SPI_CS_PIN=1  

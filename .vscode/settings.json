@@ -3,7 +3,7 @@
   "idf.openOcdConfigs": [
     "board/esp32c5-builtin.cfg"
   ],
-  "idf.portWin": "COM8",
+  "idf.portWin": "COM7",
   "idf.currentSetup": "C:\\esp\\v5.5.3\\esp-idf",
   "idf.customExtraVars": {
     "IDF_TARGET": "esp32c5"
@@ -14,5 +14,5 @@
     "--query-driver=**",
     "--compile-commands-dir=e:\\GitHub\\esp32_host\\esp32_host\\build"
   ],
-  "idf.flashType": "UART"
+  "idf.flashType": "JTAG"
 }
