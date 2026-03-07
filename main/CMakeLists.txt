@@ -3,8 +3,8 @@
 idf_component_register(
     SRCS 
         "main.c"
-        "com.c"
-        "com_queue.c"
+        "transport_layer.c"
+       
 
     INCLUDE_DIRS 
         "."

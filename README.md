@@ -48,24 +48,21 @@ Bit 7 6 5 4 | 3 2 1 0
 
 | Command  | Hex  | Type    | Data Dir | Purpose |
 |----------|------|---------|----------|---------|
-| EXQPI    | 0x00 | Control | —        | Exit Quad mode → 1-bit SPI |
-| ENQPI    | 0x01 | Control | —        | Enter Quad mode (all wires) |
-| WRBUF    | 0x02 | Data    | M→S      | Write data buffer to device |
+| WRBUF    | 0x01 | Data    | M→S      | Write data buffer to device |
+| RDBUF    | 0x02 | Data    | S→M      | Read data buffer from device |
 | WRDMA    | 0x03 | Data    | M→S      | Write bulk stream to device |
-| RDBUF    | 0x04 | Data    | S→M      | Read data buffer from device |
-| RDDMA    | 0x05 | Data    | S→M      | Read bulk stream from device |
-| SEG_DONE | 0x06 | Control | —        | Segment complete marker |
-| WR_DONE  | 0x07 | Control | —        | Write stream complete |
-| CMD8     | 0x08 | Control | —        | Reserved control command |
-| CMD9     | 0x09 | Control | —        | Reserved control command |
-| CMDA     | 0x0A | Control | —        | Reserved control command |
-
-### Example Transactions
+| RDDMA    | 0x04 | Data    | S→M      | Read bulk stream from device |
+| SEG_END  | 0x05 | Control | —        | Segment transaction end |
+| EN_QPI   | 0x06 | Control | —        | Enable QPI mode (all wires) |
+| WR_END   | 0x07 | Control | —        | Write transaction end |
+| INT0     | 0x08 | Control | —        | Interrupt/Custom command 0 |
+| INT1     | 0x09 | Control | —        | Interrupt/Custom command 1 |
+| INT2     | 0x0A | Control | —        | Interrupt/Custom command 2 |
 
 **Write WiFi Config (Master → Device):**
 ```
 Master sends 2048 bytes to device:
-  [0x02] [addr] + [SSID "network"] + [password "pass123"] + [padding...]
+  [0x01] [addr] + [SSID "network"] + [password "pass123"] + [padding...]
    ↓      ↓
  WRBUF  addr    Device receives in com.rx_data
 
@@ -75,7 +72,7 @@ Device parses credentials and connects to WiFi
 **Read WiFi Status (Device → Master):**
 ```
 Master requests status from device:
-  [0x04] [addr]
+  [0x02] [addr]
    ↓      ↓
  RDBUF  addr    Device fills com.tx_data with:
                [connected=1][signal=-45dBm][unused][unused]...
@@ -85,10 +82,10 @@ Device sends 2048 bytes back to master
 
 **Switch to Quad Mode (1-bit → 4-bit):**
 ```
-Master: [0x01] [addr]  ==  ENQPI command
+Master: [0x06] [addr]  ==  EN_QPI command
 Device: Switches all buses (D0-D3) to quad mode
 
-All following commands use 4-wire protocol until EXQPI received
+All following commands use 4-wire protocol
 ```
 
 ### Data Directions
@@ -99,9 +96,9 @@ All following commands use 4-wire protocol until EXQPI received
 
 ### QPI (Quad SPI) Mode
 
-- Send **ENQPI (0x01)** to enter quad mode
-- Send **EXQPI (0x00)** to exit quad mode back to 1-bit SPI
-- Hardware automatically switches between 1/2/4-wire based on mode
+- Send **EN_QPI (0x06)** to enable quad mode
+- Hardware automatically switches between 1/2/4-wire based on IO mode flags in command byte
+- Use IO mode flags (bits 7:4) to control wire count per transaction
 
 ### Event Queue Format
 

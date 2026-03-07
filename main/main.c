@@ -18,12 +18,19 @@
  * Copyright (C) 2026 Nima Askari - NimaLTD. All rights reserved.
  */
 
-#include "freertos/FreeRTOS.h"  
-#include "freertos/task.h"
 #include "sdkconfig.h"
 #include "esp_log.h"
 #include "driver/uart.h"
-#include "com.h"
+#include "transport_layer.h"
+#include <string.h>
+
+#define TAG "MAIN"
+
+/*
+ * ********************************************************************************************************
+ * CALLBACK IMPLEMENTATIONS
+ * ********************************************************************************************************
+*/
 
 void app_main(void)
 {
@@ -31,10 +38,13 @@ void app_main(void)
 	uart_driver_install(CONFIG_ESP_CONSOLE_UART_NUM, 256, 256, 0, NULL, 0);
 
    printf("\n========================================\n");
-   printf("ESP32 HOST - Version %s\n", PROJECT_VER);
+   printf("ESP32 WiFi Coprocessor - Version %s\n", PROJECT_VER);
    printf("https://www.github.com/nimaltd\n");
    printf("========================================\n\n");
 
-   /* Initialize communication module */
-   com_init();
+   /* Initialize transport layer */
+   tpl_init();
+   
+   ESP_LOGI(TAG, "Transport layer initialized");
+   ESP_LOGI(TAG, "Slave ready - waiting for master commands");
 }
