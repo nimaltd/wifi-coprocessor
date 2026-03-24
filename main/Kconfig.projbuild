@@ -18,22 +18,22 @@ menu "Board Configuration"
 
     # ===== SPI/QSPI Pins ===================================================
     menu "SPI/QSPI Pins"
-        config COM_SPI_SCK_PIN
+        config SPI_SCK_PIN
             int "SCK GPIO"
             default 0
-        config COM_SPI_CS_PIN
+        config SPI_CS_PIN
             int "CS GPIO"
             default 1
-        config COM_SPI_D0_MOSI_PIN
+        config SPI_D0_MOSI_PIN
             int "D0/MOSI GPIO"
             default 6
-        config COM_SPI_D1_MISO_PIN
+        config SPI_D1_MISO_PIN
             int "D1/MISO GPIO"
             default 7
-        config COM_SPI_D2_PIN
+        config SPI_D2_PIN
             int "D2 GPIO"
             default 8
-        config COM_SPI_D3_PIN
+        config SPI_D3_PIN
             int "D3 GPIO"
             default 9
     endmenu

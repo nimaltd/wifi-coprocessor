@@ -16,20 +16,26 @@
  * @instagram   https://instagram.com/github.nimaltd
  *
  * Copyright (C) 2026 Nima Askari - NimaLTD. All rights reserved.
- */
+*/
 
+#include <string.h>
 #include "sdkconfig.h"
 #include "esp_log.h"
 #include "driver/uart.h"
-#include "transport_layer.h"
-#include <string.h>
+#include "tpl.h"
+
+/*
+ * *********************************************************************************************************
+ * Definitions
+ * *********************************************************************************************************
+*/
 
 #define TAG "MAIN"
 
 /*
- * ********************************************************************************************************
- * CALLBACK IMPLEMENTATIONS
- * ********************************************************************************************************
+ * *********************************************************************************************************
+ * Function Implementations
+ * *********************************************************************************************************
 */
 
 void app_main(void)
@@ -37,14 +43,11 @@ void app_main(void)
    /* install UART driver for console/default UART */
 	uart_driver_install(CONFIG_ESP_CONSOLE_UART_NUM, 256, 256, 0, NULL, 0);
 
-   printf("\n========================================\n");
-   printf("ESP32 WiFi Coprocessor - Version %s\n", PROJECT_VER);
-   printf("https://www.github.com/nimaltd\n");
-   printf("========================================\n\n");
+   ESP_LOGI(TAG, "========================================");
+   ESP_LOGI(TAG, "ESP32 WiFi Coprocessor - Version %s", PROJECT_VER);
+   ESP_LOGI(TAG, "https://www.github.com/nimaltd");
+   ESP_LOGI(TAG, "========================================");
 
    /* Initialize transport layer */
    tpl_init();
-   
-   ESP_LOGI(TAG, "Transport layer initialized");
-   ESP_LOGI(TAG, "Slave ready - waiting for master commands");
 }
