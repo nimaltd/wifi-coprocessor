@@ -111,11 +111,9 @@ When device has pending status changes (WiFi connected, scan results, signal str
 | Len_H | 1 byte | Data length (high byte) | Total data size in big-endian |
 | Len_L | 1 byte | Data length (low byte) | Combined: (Len_H << 8) \| Len_L |
 | Data  | 0-2040 | Event payload | Raw event data |
-| **Max Frame** | **2048** | Complete event frame | Total = 8 + data_size |
+| **Max Frame** | **1600** | Complete event frame | Total = 8 + data_size |
 
 **Master reads devices via RDBUF command sequentially.**
 
 ---
 
-**Target**: ESP32-C5  
-**IDF Version**: v5.5.3

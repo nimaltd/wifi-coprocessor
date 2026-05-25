@@ -36,6 +36,4 @@ CONFIG_SPI_MASTER_ISR_IN_IRAM=y
 CONFIG_SPI_SLAVE_ISR_IN_IRAM=y
 CONFIG_SPI_SLAVE_IN_IRAM=y
 
-# --- WiFi ---------------------------------------------------------------
-CONFIG_ESP_PHY_MAX_WIFI_TX_POWER=14
 

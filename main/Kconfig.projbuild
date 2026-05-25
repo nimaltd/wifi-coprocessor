@@ -1,5 +1,5 @@
 menu "Board Configuration"
-    
+
     # ===== LED ==========================================================
     menu "LED Configuration"
         config LED_PIN
@@ -11,30 +11,38 @@ menu "Board Configuration"
             default 0
     endmenu
 
-     # ===== Interrupt ===================================================
-    config IRQ_OUT_PIN
-        int "IRQ Output GPIO"
-        default 3
+    # ===== CTRL PINS ====================================================
+    config EVENT_PIN
+        int "Event Output GPIO"
+        default 22
 
-    # ===== SPI/QSPI Pins ===================================================
-    menu "SPI/QSPI Pins"
+    config READY_PIN
+        int "Ready Output GPIO"
+        default 21
+
+    # ===== USART ========================================================
+    menu "USART Configuration"
+        config USART_RX_PIN
+            int "USART RX GPIO"
+            default 15
+        config USART_TX_PIN
+            int "USART TX GPIO"
+            default 23
+    endmenu
+
+    # ===== SPI Pins =====================================================
+    menu "SPI Pins"
         config SPI_SCK_PIN
             int "SCK GPIO"
-            default 0
+            default 19
         config SPI_CS_PIN
             int "CS GPIO"
-            default 1
-        config SPI_D0_MOSI_PIN
-            int "D0/MOSI GPIO"
-            default 6
-        config SPI_D1_MISO_PIN
-            int "D1/MISO GPIO"
-            default 7
-        config SPI_D2_PIN
-            int "D2 GPIO"
-            default 8
-        config SPI_D3_PIN
-            int "D3 GPIO"
+            default 20
+        config SPI_MOSI_PIN
+            int "MOSI GPIO"
+            default 18
+        config SPI_MISO_PIN
+            int "MISO GPIO"
             default 9
     endmenu
 

@@ -3,7 +3,9 @@
 idf_component_register(
     SRCS 
         "main.c"
-        "tpl.c"       
+        "tpl.c"
+        "tpl_spi.c"
+        "tpl_usart.c"
 
     INCLUDE_DIRS 
         "."
