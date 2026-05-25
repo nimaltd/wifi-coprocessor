@@ -40,25 +40,38 @@ extern "C" {
 #define TPL_TASK_STACK_SIZE     4096
 #define TPL_TASK_PRIORITY       5
 
+#define TPL_CMD_READ_MASK       0x80 
+
 /*
  * *********************************************************************************************************
  * Types
  * *********************************************************************************************************
 */
 
+/* List of interfaces */
+typedef enum
+{
+    TPL_INTERFACE_NONE          = 0x00,
+    TPL_INTERFACE_SPI           = 0x01,
+    TPL_INTERFACE_USART         = 0x02,
+
+} tpl_interface_t;
+
 /* List of commands */
 typedef enum
 {
-    TPL_CMD_VERSION             = 0,
+    TPL_CMD_FACTORY_RESET       = 0x00,
+    TPL_CMD_VERSION             = 0x01,
+    TPL_CMD_RESTART             = 0x02,    
 
 } tpl_cmd_t;
 
 /* List of events */
 typedef enum
 {
-    TPL_EVT_STA_CONNECTED       = 0,
+    TPL_EVT_STA_CONNECTED       = 0x00,
     TPL_EVT_STA_DISCONNECTED,
-    TPL_EVT_AP_CONNECTED,
+    TPL_EVT_AP_CONNECTED        = 0x20,
     TPL_EVT_AP_DISCONNECTED,
     TPL_EVT_ERROR,
 
@@ -67,10 +80,38 @@ typedef enum
 /* List of results */
 typedef enum
 {
-    TPL_RES_OK                  = 0,
-    TPL_RES_ERROR,
+    TPL_RES_OK                  = 0x00,
+    TPL_RES_CMD,
+    TPL_RES_PARAM,
+    TPL_RES_GENERAL_ERROR,
 
 } tpl_status_t;
+
+typedef struct __attribute__((packed))
+{
+    tpl_cmd_t                   cmd;                            /* Command code */
+    uint8_t                     payload[TPL_MAX_PAYLOAD_SIZE];  /* Payload data */
+    size_t                      payload_len;                    /* Length of the payload */
+    uint16_t                    crc;                            /* CRC16 of the payload */
+
+} tpl_rxpacket_t;
+
+typedef struct __attribute__((packed))
+{
+    tpl_status_t                status;                         /* Status of the response */
+    uint8_t                     payload[TPL_MAX_PAYLOAD_SIZE];  /* Payload data */
+    size_t                      payload_len;                    /* Length of the payload */
+    uint16_t                    crc;                            /* CRC16 of the payload */
+
+} tpl_txpacket_t;
+
+typedef struct
+{
+    tpl_interface_t             interface;
+    tpl_rxpacket_t              rx_packet;
+    tpl_txpacket_t              tx_packet;
+
+} tpl_t;
 
 /*
  * *********************************************************************************************************

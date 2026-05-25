@@ -38,6 +38,7 @@
  * *********************************************************************************************************
 */
 
+tpl_t   tpl = {0};
 
 /*
  * *********************************************************************************************************
@@ -46,6 +47,9 @@
 */
 
 void tpl_task(void *parameters);
+void tpl_cmd_rd_check(tpl_cmd_t cmd);
+void tpl_cmd_wr_check(tpl_cmd_t cmd, uint8_t *payload, size_t payload_len);
+void tpl_response(tpl_status_t status, uint8_t *payload, size_t payload_len);                                       
 
 /*
  * *********************************************************************************************************
@@ -91,14 +95,94 @@ void tpl_init(void)
 
 /**********************************************************************************************************/
 /**
- * @brief   Main task for the Transport Layer. This task will handle all the communication with the host.
- *          It will read commands from the host, execute them, and send back responses.
+ * @brief Main task for the Transport Layer. This task will handle all the communication with the host.
+ *        It will read commands from the host, execute them, and send back responses.
  */
 void tpl_task(void *parameters)
 {
     while (1)
     {
         vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+/**********************************************************************************************************/
+/**
+ * @brief Check and handle read commands.
+ * @param cmd The command to check.
+ */
+void tpl_cmd_rd_check(tpl_cmd_t cmd)
+{
+    bool is_read_cmd = (cmd & TPL_CMD_READ_MASK) != 0;
+
+    if (is_read_cmd)
+    {
+        // This is a read command, handle it accordingly
+        switch (cmd)
+        {
+            case TPL_CMD_VERSION:
+                
+                break;
+
+            default:
+                // Unknown command, send error response
+                tpl_response(TPL_RES_CMD, NULL, 0);
+                break;
+        }
+    }
+}
+
+/**********************************************************************************************************/
+/**
+ * @brief Check and handle write commands.
+ * @param cmd The command to check.
+ * @param payload The payload of the command.
+ * @param payload_len The length of the payload.
+ */
+void tpl_cmd_wr_check(tpl_cmd_t cmd, uint8_t *payload, size_t payload_len)
+{
+    bool is_read_cmd = (cmd & TPL_CMD_READ_MASK) != 0;
+
+    if (!is_read_cmd)
+    {
+        // This is a write command, handle it accordingly
+        switch (cmd)
+        {
+            case TPL_CMD_FACTORY_RESET:
+                
+                break;
+
+            case TPL_CMD_RESTART:
+                
+                break;
+
+            default:
+                // Unknown command, send error response
+                tpl_response(TPL_RES_CMD, NULL, 0);
+                break;
+        }
+    }
+}
+
+/**********************************************************************************************************/
+/** 
+ * @brief Send a response back to the host.
+ * @param status The status of the response.
+ * @param payload The payload to send back (can be NULL if no payload).
+ * @param payload_len The length of the payload (0 if no payload).
+ */
+void tpl_response(tpl_status_t status, uint8_t *payload, size_t payload_len)
+{
+    tpl.tx_packet.status = status;
+    
+    if (payload != NULL && payload_len > 0)
+    {
+        memcpy(tpl.tx_packet.payload, payload, payload_len);
+        tpl.tx_packet.payload_len = payload_len;
+    }
+    else
+    {
+        tpl.tx_packet.payload_len = 0;
     }
 }
 
