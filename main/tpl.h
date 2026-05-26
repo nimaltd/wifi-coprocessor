@@ -25,6 +25,7 @@
 #include "sdkconfig.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
+#include "esp_rom_crc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,6 +40,7 @@ extern "C" {
 #define TPL_MAX_PAYLOAD_SIZE    1500
 #define TPL_TASK_STACK_SIZE     4096
 #define TPL_TASK_PRIORITY       5
+#define TPL_CRC_POLY            0x1021
 
 #define TPL_CMD_READ_MASK       0x80 
 
@@ -62,7 +64,8 @@ typedef enum
 {
     TPL_CMD_FACTORY_RESET       = 0x00,
     TPL_CMD_VERSION             = 0x01,
-    TPL_CMD_RESTART             = 0x02,    
+    TPL_CMD_RESTART             = 0x02,
+    TPL_CMD_RESULT              = 0x03,    
 
 } tpl_cmd_t;
 
@@ -81,35 +84,44 @@ typedef enum
 typedef enum
 {
     TPL_RES_OK                  = 0x00,
-    TPL_RES_CMD,
-    TPL_RES_PARAM,
-    TPL_RES_GENERAL_ERROR,
+    TPL_RES_ERR_CMD,
+    TPL_RES_ERR_PARAM,
+    TPL_RES_ERR_GENERAL,
 
-} tpl_status_t;
-
-typedef struct __attribute__((packed))
-{
-    tpl_cmd_t                   cmd;                            /* Command code */
-    uint8_t                     payload[TPL_MAX_PAYLOAD_SIZE];  /* Payload data */
-    size_t                      payload_len;                    /* Length of the payload */
-    uint16_t                    crc;                            /* CRC16 of the payload */
-
-} tpl_rxpacket_t;
+} tpl_result_t;
 
 typedef struct __attribute__((packed))
 {
-    tpl_status_t                status;                         /* Status of the response */
-    uint8_t                     payload[TPL_MAX_PAYLOAD_SIZE];  /* Payload data */
-    size_t                      payload_len;                    /* Length of the payload */
+    uint8_t                     cmd;                            /* Command code */
+    uint16_t                    payload_len;                    /* Length of the payload */
+    uint8_t                     payload[TPL_MAX_PAYLOAD_SIZE];  /* Payload data */    
     uint16_t                    crc;                            /* CRC16 of the payload */
 
-} tpl_txpacket_t;
+} tpl_rx_packet_t;
+
+typedef struct __attribute__((packed))
+{
+    uint8_t                     result;                         /* Result */
+    uint16_t                    payload_len;                    /* Length of the payload */
+    uint8_t                     payload[TPL_MAX_PAYLOAD_SIZE];  /* Payload data */
+    uint16_t                    crc;                            /* CRC16 of the payload */
+
+} tpl_tx_packet_t;
+
+typedef struct __attribute__((packed))
+{
+    uint8_t                     result;                         /* Result */
+    uint16_t                    payload_len;                    /* Length of the payload */
+    uint8_t                     payload[TPL_MAX_PAYLOAD_SIZE];  /* Payload data */
+
+} tpl_res_packet_t;
 
 typedef struct
 {
-    tpl_interface_t             interface;
-    tpl_rxpacket_t              rx_packet;
-    tpl_txpacket_t              tx_packet;
+    tpl_interface_t             interface;      /* Interface on which the last command was received (for response) */    
+    tpl_rx_packet_t             rx_packet;      /* Received packet from host, filled by SPI/USART task */    
+    tpl_tx_packet_t             tx_packet;      /* Response for read commands, sent back immediately on read */
+    tpl_res_packet_t            wr_response;    /* Response for write commands, sent back on next read after write command is processed */
 
 } tpl_t;
 

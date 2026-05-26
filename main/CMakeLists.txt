@@ -19,6 +19,7 @@ idf_component_register(
         esp_ringbuf
         esp_wifi
         nvs_flash
+        esp_rom
 )
 
 # Add project version to compile definitions
