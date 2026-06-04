@@ -3,9 +3,7 @@
 idf_component_register(
     SRCS 
         "main.c"
-        "tpl.c"
-        "tpl_spi.c"
-        "tpl_usart.c"
+        "qspi.c"
 
     INCLUDE_DIRS 
         "."
@@ -13,10 +11,7 @@ idf_component_register(
     PRIV_REQUIRES 
         driver
         esp_driver_gpio
-        esp_driver_uart
         esp_driver_spi 
-        esp_driver_sdio
-        esp_ringbuf
         esp_wifi
         nvs_flash
         esp_rom

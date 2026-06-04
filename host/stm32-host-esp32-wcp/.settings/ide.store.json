@@ -1,0 +1,10 @@
+{
+  "source": {
+    "sourceType": "STM32CubeMX"
+  },
+  "board": "NUCLEO-H743ZI2",
+  "device": "STM32H743ZIT6",
+  "core": "Cortex-M7",
+  "order": 0,
+  "toolchain": "GCC"
+}

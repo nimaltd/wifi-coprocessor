@@ -20,30 +20,26 @@ menu "Board Configuration"
         int "Ready Output GPIO"
         default 21
 
-    # ===== USART ========================================================
-    menu "USART Configuration"
-        config USART_RX_PIN
-            int "USART RX GPIO"
-            default 15
-        config USART_TX_PIN
-            int "USART TX GPIO"
-            default 23
-    endmenu
-
-    # ===== SPI Pins =====================================================
-    menu "SPI Pins"
+    # ===== QSPI Pins ====================================================
+    menu "QSPI Pins"
         config SPI_SCK_PIN
             int "SCK GPIO"
             default 19
         config SPI_CS_PIN
             int "CS GPIO"
             default 20
-        config SPI_MOSI_PIN
-            int "MOSI GPIO"
+        config SPI_D0_PIN
+            int "D0 GPIO (MOSI)"
             default 18
-        config SPI_MISO_PIN
-            int "MISO GPIO"
+        config SPI_D1_PIN
+            int "D1 GPIO (MISO)"
             default 9
+        config SPI_D2_PIN
+            int "D2 GPIO (WP)"
+            default -1
+        config SPI_D3_PIN
+            int "D3 GPIO (HD)"
+            default -1
     endmenu
 
     # ===== WiFi ========================================================

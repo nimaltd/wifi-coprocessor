@@ -1,7 +1,6 @@
-﻿
 /*
- * @file        main.c
- * @brief       main application entry point for the ESP32 HOST project.
+ * @file        wcp.h
+ * @brief       WiFi Co-Processor Host API
  * @author      Nima Askari
  * @version     0.0.1
  * @license     See the LICENSE file in the root folder.
@@ -15,35 +14,52 @@
  * @youtube     https://www.youtube.com/@nimaltd
  * @instagram   https://instagram.com/github.nimaltd
  *
- * Copyright (C) 2026 Nima Askari - NimaLTD. All rights reserved.
+ * Copyright (C) 2025 Nima Askari - NimaLTD. All rights reserved.
 */
 
-#include <string.h>
-#include "sdkconfig.h"
-#include "esp_log.h"
-#include "qspi.h"
+#ifndef _WCP_WCP_H_
+#define _WCP_WCP_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdint.h>
 
 /*
  * *********************************************************************************************************
- * Definitions
+ * Types
  * *********************************************************************************************************
-*/
+ */
 
-#define TAG "MAIN"
-
-/*
- * *********************************************************************************************************
- * Function Implementations
- * *********************************************************************************************************
-*/
-
-void app_main(void)
+typedef enum
 {
-   ESP_LOGI(TAG, "========================================");
-   ESP_LOGI(TAG, "ESP32 WiFi Coprocessor - Version %s", PROJECT_VER);
-   ESP_LOGI(TAG, "https://www.github.com/nimaltd");
-   ESP_LOGI(TAG, "========================================");
+    WCP_STATUS_OK = 0,
+    WCP_STATUS_INVALID_ARG,
+    WCP_STATUS_COMM_ERROR,
+    WCP_STATUS_TIMEOUT,
+    WCP_STATUS_NOT_IMPLEMENTED
+    
+} wcp_status_t;
 
-   /* Initialize QSPI transport layer */
-   qspi_init();
+/*
+ * *********************************************************************************************************
+ * Public Function Prototypes
+ * *********************************************************************************************************
+ */
+
+void wcp_init(void);
+
+wcp_status_t wcp_send(const uint8_t *data, uint16_t len, uint32_t timeout_ms);
+
+wcp_status_t wcp_receive(uint8_t *data, uint16_t *io_len, uint32_t timeout_ms);
+
+wcp_status_t wcp_network_init(void);
+
+wcp_status_t wcp_wifi_control(uint32_t command, const uint8_t *payload, uint16_t payload_len);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* WCP_WCP_H */

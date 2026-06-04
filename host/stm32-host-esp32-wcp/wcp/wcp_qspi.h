@@ -1,7 +1,9 @@
-﻿
+﻿#ifndef _WCP_QSPI_H_
+#define _WCP_QSPI_H_
+
 /*
- * @file        main.c
- * @brief       main application entry point for the ESP32 HOST project.
+ * @file        wcp_qspi.h
+ * @brief       WiFi Co-Processor QSPI Backend API
  * @author      Nima Askari
  * @version     0.0.1
  * @license     See the LICENSE file in the root folder.
@@ -18,32 +20,26 @@
  * Copyright (C) 2026 Nima Askari - NimaLTD. All rights reserved.
 */
 
-#include <string.h>
-#include "sdkconfig.h"
-#include "esp_log.h"
-#include "qspi.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "wcp.h"
 
 /*
  * *********************************************************************************************************
- * Definitions
+ * Public Function Prototypes
  * *********************************************************************************************************
-*/
+ */
 
-#define TAG "MAIN"
+void            wcp_qspi_init(void);
 
-/*
- * *********************************************************************************************************
- * Function Implementations
- * *********************************************************************************************************
-*/
+wcp_status_t    wcp_qspi_send(const uint8_t *data, uint16_t len, uint32_t timeout_ms);
 
-void app_main(void)
-{
-   ESP_LOGI(TAG, "========================================");
-   ESP_LOGI(TAG, "ESP32 WiFi Coprocessor - Version %s", PROJECT_VER);
-   ESP_LOGI(TAG, "https://www.github.com/nimaltd");
-   ESP_LOGI(TAG, "========================================");
+wcp_status_t    wcp_qspi_receive(uint8_t *data, uint16_t *io_len, uint32_t timeout_ms);
 
-   /* Initialize QSPI transport layer */
-   qspi_init();
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* _WCP_QSPI_H_ */
