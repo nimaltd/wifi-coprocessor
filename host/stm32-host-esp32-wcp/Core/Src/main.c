@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include <stdio.h>
 #include <string.h>
 #include "wcp.h"
 
@@ -36,6 +37,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+#define WCP_REG_RX_COUNT_ADDR    4U
+#define WCP_POLL_INTERVAL_MS     1U
+#define WCP_RX_WAIT_TIMEOUT_MS   200U
 
 /* USER CODE END PD */
 
@@ -57,6 +62,9 @@ void SystemClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
 
+static void WCP_DumpAllRegisters(void);
+static wcp_err_t WCP_ReadRegisterU32(uint32_t reg_addr, uint32_t *value);
+static wcp_err_t WCP_WaitRxCountIncrement(uint32_t previous_count, uint32_t *new_count);
 static void WCP_RunTestProgram(void);
 
 /* USER CODE END PFP */
@@ -190,38 +198,184 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+static void WCP_DumpAllRegisters(void)
+{
+  uint8_t reg_data[4];
+  uint32_t reg_value;
+
+  printf("WCP REGISTER DUMP START\r\n");
+
+  for (uint32_t reg_addr = 0; reg_addr < 20U; reg_addr += 4U)
+  {
+    memset(reg_data, 0, sizeof(reg_data));
+
+    wcp_err_t reg_status = wcp_read_reg(reg_addr, reg_data, (uint16_t)sizeof(reg_data));
+    if (reg_status == WCP_ERR_NONE)
+    {
+      reg_value = ((uint32_t)reg_data[0]) |
+                  ((uint32_t)reg_data[1] << 8) |
+                  ((uint32_t)reg_data[2] << 16) |
+                  ((uint32_t)reg_data[3] << 24);
+
+      printf("REG[0x%02lX] = 0x%08lX (%lu)\r\n",
+             (unsigned long)reg_addr,
+             (unsigned long)reg_value,
+             (unsigned long)reg_value);
+    }
+    else
+    {
+      printf("REG[0x%02lX] READ FAILED (%d)\r\n", (unsigned long)reg_addr, (int)reg_status);
+    }
+  }
+
+  printf("WCP REGISTER DUMP END\r\n");
+}
+
+static wcp_err_t WCP_ReadRegisterU32(uint32_t reg_addr, uint32_t *value)
+{
+  uint8_t reg_data[4];
+  wcp_err_t status;
+
+  if (value == NULL)
+  {
+    return WCP_ERR_INVALID_ARG;
+  }
+
+  status = wcp_read_reg(reg_addr, reg_data, (uint16_t)sizeof(reg_data));
+  if (status != WCP_ERR_NONE)
+  {
+    return status;
+  }
+
+  *value = ((uint32_t)reg_data[0]) |
+           ((uint32_t)reg_data[1] << 8) |
+           ((uint32_t)reg_data[2] << 16) |
+           ((uint32_t)reg_data[3] << 24);
+
+  return WCP_ERR_NONE;
+}
+
+static wcp_err_t WCP_WaitRxCountIncrement(uint32_t previous_count, uint32_t *new_count)
+{
+  uint32_t current_count = previous_count;
+
+  if (new_count == NULL)
+  {
+    return WCP_ERR_INVALID_ARG;
+  }
+
+  for (uint32_t elapsed = 0U; elapsed < WCP_RX_WAIT_TIMEOUT_MS; elapsed += WCP_POLL_INTERVAL_MS)
+  {
+    wcp_err_t status = WCP_ReadRegisterU32(WCP_REG_RX_COUNT_ADDR, &current_count);
+    if (status != WCP_ERR_NONE)
+    {
+      return status;
+    }
+
+    if (current_count != previous_count)
+    {
+      *new_count = current_count;
+      return WCP_ERR_NONE;
+    }
+
+    HAL_Delay(WCP_POLL_INTERVAL_MS);
+  }
+
+  *new_count = current_count;
+  return WCP_ERR_TIMEOUT;
+}
+
 static void WCP_RunTestProgram(void)
 {
-  static const uint8_t tx_test_cmd[] = "QSPI_TEST";
+  uint8_t tx_buffer[64];
+  uint8_t expected_rx_buffer[64];
   uint8_t rx_buffer[64] = {0};
   uint16_t rx_len = (uint16_t)sizeof(rx_buffer);
+  uint32_t rx_count_before = 0U;
+  uint32_t rx_count_after = 0U;
 
-  wcp_status_t tx_status = wcp_send(tx_test_cmd, (uint16_t)sizeof(tx_test_cmd), 1000U);
-  if (tx_status != WCP_STATUS_OK)
+  wcp_err_t reg_status = WCP_ReadRegisterU32(WCP_REG_RX_COUNT_ADDR, &rx_count_before);
+  if (reg_status != WCP_ERR_NONE)
+  {
+    BSP_LED_On(LED_RED);
+    printf("WCP TEST RX_COUNT PRE-READ FAILED (%d)\r\n", (int)reg_status);
+    return;
+  }
+
+  tx_buffer[0] = 'T';
+  tx_buffer[1] = 'E';
+  tx_buffer[2] = 'S';
+  tx_buffer[3] = 'T';
+  for (uint32_t i = 4U; i < sizeof(tx_buffer); ++i)
+  {
+    tx_buffer[i] = (uint8_t)i;
+  }
+
+  expected_rx_buffer[0] = 'O';
+  expected_rx_buffer[1] = 'K';
+  expected_rx_buffer[2] = '6';
+  expected_rx_buffer[3] = '4';
+  for (uint32_t i = 4U; i < sizeof(expected_rx_buffer); ++i)
+  {
+    expected_rx_buffer[i] = (uint8_t)(0xA0U + (uint8_t)i);
+  }
+
+  wcp_err_t tx_status = wcp_write_data(tx_buffer, (uint16_t)sizeof(tx_buffer));
+  WCP_DumpAllRegisters();
+  if (tx_status != WCP_ERR_NONE)
   {
     BSP_LED_On(LED_RED);
     printf("WCP TEST TX FAILED (%d)\r\n", (int)tx_status);
     return;
   }
 
-  wcp_status_t rx_status = wcp_receive(rx_buffer, &rx_len, 1000U);
-  if (rx_status != WCP_STATUS_OK)
+  wcp_err_t wait_status = WCP_WaitRxCountIncrement(rx_count_before, &rx_count_after);
+  if (wait_status != WCP_ERR_NONE)
+  {
+    BSP_LED_On(LED_RED);
+    printf("WCP TEST WAIT RX_COUNT TIMEOUT/FAIL (%d), before=%lu after=%lu\r\n",
+           (int)wait_status,
+           (unsigned long)rx_count_before,
+           (unsigned long)rx_count_after);
+    return;
+  }
+
+  wcp_err_t rx_status = wcp_read_data(rx_buffer, rx_len);
+  WCP_DumpAllRegisters();
+  if (rx_status != WCP_ERR_NONE)
   {
     BSP_LED_On(LED_RED);
     printf("WCP TEST RX FAILED (%d)\r\n", (int)rx_status);
     return;
   }
 
-  if (strncmp((const char *)rx_buffer, "QSPI_TEST_OK", strlen("QSPI_TEST_OK")) == 0)
+  if (memcmp(rx_buffer, expected_rx_buffer, sizeof(expected_rx_buffer)) == 0)
   {
     BSP_LED_Off(LED_RED);
     BSP_LED_Toggle(LED_GREEN);
-    printf("WCP TEST PASS\r\n");
+    printf("WCP TEST PASS (fixed 64-byte response)\r\n");
   }
   else
   {
+    uint32_t mismatch_index = 0U;
+    while (mismatch_index < sizeof(expected_rx_buffer) &&
+           rx_buffer[mismatch_index] == expected_rx_buffer[mismatch_index])
+    {
+      ++mismatch_index;
+    }
+
     BSP_LED_On(LED_RED);
-    printf("WCP TEST INVALID RESPONSE: %s\r\n", rx_buffer);
+    if (mismatch_index < sizeof(expected_rx_buffer))
+    {
+      printf("WCP TEST INVALID 64-byte RESPONSE idx=%lu rx=0x%02X exp=0x%02X\r\n",
+             (unsigned long)mismatch_index,
+             rx_buffer[mismatch_index],
+             expected_rx_buffer[mismatch_index]);
+    }
+    else
+    {
+      printf("WCP TEST INVALID 64-byte RESPONSE (unknown diff)\r\n");
+    }
   }
 }
 

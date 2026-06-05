@@ -22,31 +22,49 @@
 
 /*
  * *********************************************************************************************************
- * Communication Mode Selection
+ * Defines
  * *********************************************************************************************************
- */
+*/
 
 /* Communication mode selection. */
-#define WCP_MODE_SPI_1_1_1       0U
-#define WCP_MODE_QSPI_1_1_1      1U
-#define WCP_MODE_QSPI_DOUT_1_1_2 2U
-#define WCP_MODE_QSPI_DIO_1_2_2  3U
-#define WCP_MODE_QSPI_QOUT_1_1_4 4U
-#define WCP_MODE_QSPI_QIO_1_4_4  5U
+#define WCP_MODE_SPI_1_1_1          0U
+#define WCP_MODE_QSPI_1_1_1         1U
+#define WCP_MODE_QSPI_DOUT_1_1_2    2U
+#define WCP_MODE_QSPI_DIO_1_2_2     3U
+#define WCP_MODE_QSPI_QOUT_1_1_4    4U
+#define WCP_MODE_QSPI_QIO_1_4_4     5U
 
 /*
- * Select active communication mode:
- * - WCP_MODE_SPI_1_1_1
- * - WCP_MODE_QSPI_1_1_1
- * - WCP_MODE_QSPI_DOUT_1_1_2
- * - WCP_MODE_QSPI_DIO_1_2_2
- * - WCP_MODE_QSPI_QOUT_1_1_4
- * - WCP_MODE_QSPI_QIO_1_4_4
- */
-#define WCP_SELECTED_MODE WCP_MODE_QSPI_QIO_1_4_4
+ * *********************************************************************************************************
+ * Configuration
+ * *********************************************************************************************************
+*/
+
+/* Ready Pin */
+#define WCP_READY_GPIO              GPIOB
+#define WCP_READY_PIN               GPIO_PIN_2
+
+/* Data Available Pin */
+#define WCP_DATA_AVAILABLE_GPIO     GPIOB
+#define WCP_DATA_AVAILABLE_PIN      GPIO_PIN_3
+
+/* SPI/QSPI Handle */
+#define WCP_HAL_HANDLE              hqspi
+
+/* Selected communication mode. */
+#define WCP_SELECTED_MODE           WCP_MODE_QSPI_QIO_1_4_4
 
 /* Read dummy cycles for QSPI fast read transactions. */
-#define WCP_QSPI_READ_DUMMY_CYCLES 8U
+#define WCP_QSPI_READ_DUMMY_CYCLES  8U
+
+/* Timeout used for WCP blocking transfers (milliseconds). */
+#define WCP_TRANSFER_TIMEOUT_MS     1000U
+
+/*
+ * *********************************************************************************************************
+ * Check for valid configuration
+ * *********************************************************************************************************
+*/
 
 #if (WCP_SELECTED_MODE > WCP_MODE_QSPI_QIO_1_4_4)
 #error "Invalid WCP_SELECTED_MODE value"

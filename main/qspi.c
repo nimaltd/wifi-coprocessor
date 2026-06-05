@@ -52,8 +52,7 @@
 #define QSPI_REG_TEST_PASS          20
 
 #define QSPI_READY_FLAG             0x51535049UL /* 'QSPI' */
-#define QSPI_TEST_CMD               "QSPI_TEST"
-#define QSPI_TEST_OK                "QSPI_TEST_OK"
+#define QSPI_TEST_DATA_LEN          64U
 #define QSPI_TX_PREFIX              "ECHO:"
 
 /*
@@ -437,15 +436,23 @@ static size_t qspi_build_rx_response(const uint8_t *in, size_t in_len, uint8_t *
 
     memset(out, 0, out_len);
 
-    if (in != NULL && in_len >= strlen(QSPI_TEST_CMD) && memcmp(in, QSPI_TEST_CMD, strlen(QSPI_TEST_CMD)) == 0)
+    if (in != NULL && in_len >= QSPI_TEST_DATA_LEN && out_len >= QSPI_TEST_DATA_LEN &&
+        in[0] == 'T' && in[1] == 'E' && in[2] == 'S' && in[3] == 'T')
     {
-        size_t len = strlen(QSPI_TEST_OK) + 1U;
-        memcpy(out, QSPI_TEST_OK, len);
+        out[0] = 'O';
+        out[1] = 'K';
+        out[2] = '6';
+        out[3] = '4';
+        for (size_t i = 4U; i < QSPI_TEST_DATA_LEN; ++i)
+        {
+            out[i] = (uint8_t)(0xA0U + (uint8_t)i);
+        }
+
         xSemaphoreTake(qspi_stats_mutex, portMAX_DELAY);
         qspi_stats.test_pass = 1;
         xSemaphoreGive(qspi_stats_mutex);
-        ESP_LOGI(TAG, "QSPI communication test PASS");
-        return len;
+        ESP_LOGI(TAG, "QSPI communication test PASS (fixed 64-byte response)");
+        return QSPI_TEST_DATA_LEN;
     }
 
     size_t prefix_len = strlen(QSPI_TX_PREFIX);

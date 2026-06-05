@@ -39,11 +39,7 @@
  */
 void wcp_init(void)
 {
-#if (WCP_SELECTED_MODE == WCP_MODE_SPI_1_1_1)
-    wcp_spi_init();
-#else
-    wcp_qspi_init();
-#endif
+
 }
 
 /**********************************************************************************************************/
@@ -51,20 +47,19 @@ void wcp_init(void)
  * @brief Send payload through selected WCP communication backend.
  * @param data: Pointer to payload buffer.
  * @param len: Payload length in bytes.
- * @param timeout_ms: Timeout for transfer.
- * @return WCP status.
+ * @return WCP error code.
  */
-wcp_status_t wcp_send(const uint8_t *data, uint16_t len, uint32_t timeout_ms)
+wcp_err_t wcp_write_data(const uint8_t *data, uint16_t len)
 {
     if (data == 0 || len == 0U)
     {
-        return WCP_STATUS_INVALID_ARG;
+        return WCP_ERR_INVALID_ARG;
     }
 
 #if (WCP_SELECTED_MODE == WCP_MODE_SPI_1_1_1)
-    return wcp_spi_send(data, len, timeout_ms);
+    return wcp_spi_write_data(data, len);
 #else
-    return wcp_qspi_send(data, len, timeout_ms);
+    return wcp_qspi_write_data(data, len);
 #endif
 }
 
@@ -72,32 +67,75 @@ wcp_status_t wcp_send(const uint8_t *data, uint16_t len, uint32_t timeout_ms)
 /**
  * @brief Receive payload through selected WCP communication backend.
  * @param data: Pointer to receive buffer.
- * @param io_len: In/out length for receive operation.
- * @param timeout_ms: Timeout for transfer.
- * @return WCP status.
+ * @param io_len: Length for receive operation.
+ * @return WCP error code.
  */
-wcp_status_t wcp_receive(uint8_t *data, uint16_t *io_len, uint32_t timeout_ms)
+wcp_err_t wcp_read_data(uint8_t *data, uint16_t io_len)
 {
-    if (data == 0 || io_len == 0 || *io_len == 0U)
+    if (data == 0 || io_len == 0U)
     {
-        return WCP_STATUS_INVALID_ARG;
+        return WCP_ERR_INVALID_ARG;
     }
 
 #if (WCP_SELECTED_MODE == WCP_MODE_SPI_1_1_1)
-    return wcp_spi_receive(data, io_len, timeout_ms);
+    return wcp_spi_read_data(data, io_len);
 #else
-    return wcp_qspi_receive(data, io_len, timeout_ms);
+    return wcp_qspi_read_data(data, io_len);
+#endif
+}
+
+/**********************************************************************************************************/
+/**
+ * @brief Write bytes to ESP32 SPI HD slave register/buffer address.
+ * @param reg_addr: 0~63.
+ * @param data: Pointer to payload buffer.
+ * @param len: Payload length in bytes.
+ * @return WCP error code.
+ */
+wcp_err_t wcp_write_reg(uint32_t reg_addr, const uint8_t *data, uint16_t len)
+{
+    if (data == 0 || len == 0U || reg_addr > 63U)
+    {
+        return WCP_ERR_INVALID_ARG;
+    }
+
+#if (WCP_SELECTED_MODE == WCP_MODE_SPI_1_1_1)
+    return wcp_spi_write_reg(reg_addr, data, len);
+#else
+    return wcp_qspi_write_reg(reg_addr, data, len);
+#endif
+}
+
+/**********************************************************************************************************/
+/**
+ * @brief Read bytes from ESP32 SPI HD slave register/buffer address.
+ * @param reg_addr: 0~63.
+ * @param data: Pointer to destination buffer.
+ * @param len: Number of bytes to read.
+ * @return WCP error code.
+ */
+wcp_err_t wcp_read_reg(uint32_t reg_addr, uint8_t *data, uint16_t len)
+{
+    if (data == 0 || len == 0U || reg_addr > 63U)
+    {
+        return WCP_ERR_INVALID_ARG;
+    }
+
+#if (WCP_SELECTED_MODE == WCP_MODE_SPI_1_1_1)
+    return wcp_spi_read_reg(reg_addr, data, len);
+#else
+    return wcp_qspi_read_reg(reg_addr, data, len);
 #endif
 }
 
 /**********************************************************************************************************/
 /**
  * @brief Initialize future network control layer.
- * @return WCP status.
+ * @return WCP error code.
  */
-wcp_status_t wcp_network_init(void)
+wcp_err_t wcp_network_init(void)
 {
-    return WCP_STATUS_NOT_IMPLEMENTED;
+    return WCP_ERR_NOT_IMPLEMENTED;
 }
 
 /**********************************************************************************************************/
@@ -106,12 +144,12 @@ wcp_status_t wcp_network_init(void)
  * @param command: Control command identifier.
  * @param payload: Optional command payload.
  * @param payload_len: Payload length in bytes.
- * @return WCP status.
+ * @return WCP error code.
  */
-wcp_status_t wcp_wifi_control(uint32_t command, const uint8_t *payload, uint16_t payload_len)
+wcp_err_t wcp_wifi_control(uint32_t command, const uint8_t *payload, uint16_t payload_len)
 {
     (void)command;
     (void)payload;
     (void)payload_len;
-    return WCP_STATUS_NOT_IMPLEMENTED;
+    return WCP_ERR_NOT_IMPLEMENTED;
 }

@@ -17,11 +17,11 @@
  * Copyright (C) 2026 Nima Askari - NimaLTD. All rights reserved.
 */
 
-#include "wcp_spi.h"
-
 #include "wcp_conf.h"
 
 #if (WCP_SELECTED_MODE == WCP_MODE_SPI_1_1_1)
+
+#include "wcp_spi.h"
 
 /*
  * *********************************************************************************************************
@@ -31,43 +31,66 @@
 
 /**********************************************************************************************************/
 /**
- * @brief Initialize SPI backend resources.
- */
-void wcp_spi_init(void)
-{
-    /* TODO: SPI backend initialization will be added later. */
-}
-
-/**********************************************************************************************************/
-/**
  * @brief Send payload using SPI backend.
  * @param data: Pointer to payload buffer.
  * @param len: Payload length in bytes.
- * @param timeout_ms: Timeout for transfer.
- * @return WCP status.
+ * @return WCP error code.
  */
-wcp_status_t wcp_spi_send(const uint8_t *data, uint16_t len, uint32_t timeout_ms)
+wcp_err_t wcp_spi_write_data(const uint8_t *data, uint16_t len)
 {
     (void)data;
     (void)len;
-    (void)timeout_ms;
-    return WCP_STATUS_NOT_IMPLEMENTED;
+    (void)WCP_TRANSFER_TIMEOUT_MS;
+    return WCP_ERR_NOT_IMPLEMENTED;
 }
 
 /**********************************************************************************************************/
 /**
- * @brief Receive payload using SPI backend.
+ * @brief Read payload using SPI backend.
  * @param data: Pointer to receive buffer.
- * @param io_len: In/out length for receive operation.
- * @param timeout_ms: Timeout for transfer.
- * @return WCP status.
+ * @param io_len: Length for receive operation.
+ * @return WCP error code.
  */
-wcp_status_t wcp_spi_receive(uint8_t *data, uint16_t *io_len, uint32_t timeout_ms)
+wcp_err_t wcp_spi_read_data(uint8_t *data, uint16_t io_len)
 {
     (void)data;
     (void)io_len;
-    (void)timeout_ms;
-    return WCP_STATUS_NOT_IMPLEMENTED;
+    (void)WCP_TRANSFER_TIMEOUT_MS;
+    return WCP_ERR_NOT_IMPLEMENTED;
+}
+
+/**********************************************************************************************************/
+/**
+ * @brief Write bytes to register/buffer address using SPI backend.
+ * @param reg_addr: 0~63.
+ * @param data: Pointer to payload buffer.
+ * @param len: Payload length in bytes.
+ * @return WCP error code.
+ */
+wcp_err_t wcp_spi_write_reg(uint32_t reg_addr, const uint8_t *data, uint16_t len)
+{
+    (void)reg_addr;
+    (void)data;
+    (void)len;
+    (void)WCP_TRANSFER_TIMEOUT_MS;
+    return WCP_ERR_NOT_IMPLEMENTED;
+}
+
+/**********************************************************************************************************/
+/**
+ * @brief Read bytes from register/buffer address using SPI backend.
+ * @param reg_addr: 32-bit target register/buffer address.
+ * @param data: Pointer to destination buffer.
+ * @param len: Number of bytes to read.
+ * @return WCP error code.
+ */
+wcp_err_t wcp_spi_read_reg(uint32_t reg_addr, uint8_t *data, uint16_t len)
+{
+    (void)reg_addr;
+    (void)data;
+    (void)len;
+    (void)WCP_TRANSFER_TIMEOUT_MS;
+    return WCP_ERR_NOT_IMPLEMENTED;
 }
 
 #endif /* (WCP_SELECTED_MODE == WCP_MODE_SPI_1_1_1) */

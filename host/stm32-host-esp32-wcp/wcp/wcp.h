@@ -34,13 +34,13 @@ extern "C" {
 
 typedef enum
 {
-    WCP_STATUS_OK = 0,
-    WCP_STATUS_INVALID_ARG,
-    WCP_STATUS_COMM_ERROR,
-    WCP_STATUS_TIMEOUT,
-    WCP_STATUS_NOT_IMPLEMENTED
-    
-} wcp_status_t;
+    WCP_ERR_NONE = 0,
+    WCP_ERR_INVALID_ARG,
+    WCP_ERR_TIMEOUT,
+    WCP_ERR_NOT_IMPLEMENTED,
+    WCP_ERR_UNKNOWN
+
+} wcp_err_t;
 
 /*
  * *********************************************************************************************************
@@ -48,15 +48,19 @@ typedef enum
  * *********************************************************************************************************
  */
 
-void wcp_init(void);
+void        wcp_init(void);
 
-wcp_status_t wcp_send(const uint8_t *data, uint16_t len, uint32_t timeout_ms);
+wcp_err_t   wcp_write_data(const uint8_t *data, uint16_t len);
 
-wcp_status_t wcp_receive(uint8_t *data, uint16_t *io_len, uint32_t timeout_ms);
+wcp_err_t   wcp_read_data(uint8_t *data, uint16_t io_len);
 
-wcp_status_t wcp_network_init(void);
+wcp_err_t   wcp_write_reg(uint32_t reg_addr, const uint8_t *data, uint16_t len);
 
-wcp_status_t wcp_wifi_control(uint32_t command, const uint8_t *payload, uint16_t payload_len);
+wcp_err_t   wcp_read_reg(uint32_t reg_addr, uint8_t *data, uint16_t len);
+
+wcp_err_t   wcp_network_init(void);
+
+wcp_err_t   wcp_wifi_control(uint32_t command, const uint8_t *payload, uint16_t payload_len);
 
 #ifdef __cplusplus
 }

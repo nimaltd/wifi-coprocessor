@@ -24,7 +24,12 @@
 extern "C" {
 #endif
 
+#include "wcp_conf.h"
+
+#if (WCP_SELECTED_MODE != WCP_MODE_SPI_1_1_1)
+
 #include "wcp.h"
+#include "quadspi.h"
 
 /*
  * *********************************************************************************************************
@@ -32,14 +37,17 @@ extern "C" {
  * *********************************************************************************************************
  */
 
-void            wcp_qspi_init(void);
+wcp_err_t   wcp_qspi_write_data(const uint8_t *data, uint16_t len);
 
-wcp_status_t    wcp_qspi_send(const uint8_t *data, uint16_t len, uint32_t timeout_ms);
+wcp_err_t   wcp_qspi_read_data(uint8_t *data, uint16_t io_len);
 
-wcp_status_t    wcp_qspi_receive(uint8_t *data, uint16_t *io_len, uint32_t timeout_ms);
+wcp_err_t   wcp_qspi_write_reg(uint32_t reg_addr, const uint8_t *data, uint16_t len);
+
+wcp_err_t   wcp_qspi_read_reg(uint32_t reg_addr, uint8_t *data, uint16_t len);
 
 #ifdef __cplusplus
 }
 #endif
 
+#endif /* WCP_SELECTED_MODE != WCP_MODE_SPI_1_1_1 */
 #endif /* _WCP_QSPI_H_ */
