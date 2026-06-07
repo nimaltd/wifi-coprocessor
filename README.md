@@ -1,5 +1,6 @@
 
-# ESP32-C5 WiFi Co-Processor
+# ESP32-All Series WiFi Co-Processor
+# Do not use, Under development
 
 **SPI/QSPI Slave Interface with Dynamic Mode Switching (1/2/4-bit)**
 
@@ -17,8 +18,9 @@ Every SPI transaction follows this frame format:
 |------------|-----------|-----------|---------------|
 | Command    | 1 byte    | M→S       | [IO Mode(4 bits)][Command(4 bits)] |
 | Address    | 1 byte    | M→S       | Parameter or buffer address |
-| Data       | 0-2048    | M↔S       | Payload (M→S for write, S→M for read) |
-| **TOTAL**  | **2-2050**| —         | Minimum 2 bytes, maximum 2050 bytes |
+| Dummy      | 1 byte    | M→S       | Waiting |
+| Data       | 0-1536    | M↔S       | Payload (M→S for write, S→M for read) |
+
 
 ### Command Byte Format
 
@@ -55,65 +57,7 @@ Bit 7 6 5 4 | 3 2 1 0
 | SEG_END  | 0x05 | Control | —        | Segment transaction end |
 | EN_QPI   | 0x06 | Control | —        | Enable QPI mode (all wires) |
 | WR_END   | 0x07 | Control | —        | Write transaction end |
-| INT0     | 0x08 | Control | —        | Interrupt/Custom command 0 |
+| READ_END | 0x08 | Control | —        | Read transaction end |
 | INT1     | 0x09 | Control | —        | Interrupt/Custom command 1 |
 | INT2     | 0x0A | Control | —        | Interrupt/Custom command 2 |
-
-**Write WiFi Config (Master → Device):**
-```
-Master sends 2048 bytes to device:
-  [0x01] [addr] + [SSID "network"] + [password "pass123"] + [padding...]
-   ↓      ↓
- WRBUF  addr    Device receives in com.rx_data
-
-Device parses credentials and connects to WiFi
-```
-
-**Read WiFi Status (Device → Master):**
-```
-Master requests status from device:
-  [0x02] [addr]
-   ↓      ↓
- RDBUF  addr    Device fills com.tx_data with:
-               [connected=1][signal=-45dBm][unused][unused]...
-               
-Device sends 2048 bytes back to master
-```
-
-**Switch to Quad Mode (1-bit → 4-bit):**
-```
-Master: [0x06] [addr]  ==  EN_QPI command
-Device: Switches all buses (D0-D3) to quad mode
-
-All following commands use 4-wire protocol
-```
-
-### Data Directions
-
-- **M→S (WRBUF/WRDMA)**: Master uploads data → device processes in `com.rx_data`
-- **S→M (RDBUF/RDDMA)**: Device sends data from `com.tx_data` → master reads
-- **Control (others)**: No data phase, just logging
-
-### QPI (Quad SPI) Mode
-
-- Send **EN_QPI (0x06)** to enable quad mode
-- Hardware automatically switches between 1/2/4-wire based on IO mode flags in command byte
-- Use IO mode flags (bits 7:4) to control wire count per transaction
-
-### Event Queue Format
-
-When device has pending status changes (WiFi connected, scan results, signal strength):
-
-| Field | Size | Content | Notes |
-|-------|------|---------|-------|
-| Type  | 1 byte | Event type identifier | User-defined event code |
-| Param | 1 byte | Event parameter | Command-specific data |
-| Len_H | 1 byte | Data length (high byte) | Total data size in big-endian |
-| Len_L | 1 byte | Data length (low byte) | Combined: (Len_H << 8) \| Len_L |
-| Data  | 0-2040 | Event payload | Raw event data |
-| **Max Frame** | **1600** | Complete event frame | Total = 8 + data_size |
-
-**Master reads devices via RDBUF command sequentially.**
-
----
 
