@@ -115,6 +115,8 @@ static uint16_t qspi_crc16(const uint8_t *data, size_t len);
 static size_t   qspi_align4(size_t value);
 static size_t   qspi_prepare_default_tx(uint8_t *out, size_t out_len);
 static size_t   qspi_build_rx_response(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
+static bool     qspi_cb_buffer_rx(void *arg, spi_slave_hd_event_t *event, int *awoken);
+static bool     qspi_cb_send_dma_ready(void *arg, spi_slave_hd_event_t *event, int *awoken);
 
 /*
  * *********************************************************************************************************
@@ -201,7 +203,12 @@ static void qspi_init_slave_hd(void)
         .dummy_bits   = 8,
         .queue_size   = QSPI_QUEUE_SIZE,
         .dma_chan     = SPI_DMA_CH_AUTO,
-        .cb_config    = (spi_slave_hd_callback_config_t){0},
+        .cb_config    =
+        {
+            .cb_buffer_rx = qspi_cb_buffer_rx,
+            .cb_send_dma_ready = qspi_cb_send_dma_ready,
+            .arg = NULL,
+        },
     };
 
     ESP_ERROR_CHECK(spi_slave_hd_init(QSPI_HOST, &bus_cfg, &slot_cfg));
@@ -475,6 +482,30 @@ static size_t qspi_build_rx_response(const uint8_t *in, size_t in_len, uint8_t *
 
     out[prefix_len + copy_len] = '\0';
     return prefix_len + copy_len + 1U;
+}
+
+/**********************************************************************************************************/
+/**
+ * @brief Callback function for when the SPI slave HD receives data on register.
+ */
+static bool qspi_cb_buffer_rx(void *arg, spi_slave_hd_event_t *event, int *awoken)
+{
+    (void)arg;
+    (void)event;
+    (void)awoken;
+    return false;
+}
+
+/**********************************************************************************************************/
+/**
+ * @brief Callback function for when the SPI slave HD is ready to send data via DMA.
+ */
+static bool qspi_cb_send_dma_ready(void *arg, spi_slave_hd_event_t *event, int *awoken)
+{
+    (void)arg;
+    (void)event;
+    (void)awoken;
+    return false;
 }
 
 /*
