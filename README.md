@@ -1,5 +1,5 @@
 
-# ESP32-All Series WiFi Co-Processor
+# ESP32 WiFi Co-Processor
 # Do not use, Under development
 
 **SPI/QSPI Slave Interface with Dynamic Mode Switching (1/2/4-bit)**
