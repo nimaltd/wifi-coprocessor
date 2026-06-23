@@ -25,6 +25,7 @@
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "esp_log.h"
+#include "esp_chip_info.h"
 #include "esp_heap_caps.h"
 #include "esp_rom_crc.h"
 #include "driver/gpio.h"
@@ -44,14 +45,10 @@
 #define QSPI_RX_BUF_LEN             1536U
 #define QSPI_TX_BUF_LEN             1536U
 
-#define QSPI_REG_READY              0
-#define QSPI_REG_RX_COUNT           4
-#define QSPI_REG_TX_COUNT           8
-#define QSPI_REG_LAST_RX_LEN        12
-#define QSPI_REG_LAST_RX_CRC        16
-#define QSPI_REG_TEST_PASS          20
+#define QSPI_REG_READ_CONST_IDX     0
+#define QSPI_REG_READ_IDX           4
+#define QSPI_REG_WRITE_IDX          48
 
-#define QSPI_READY_FLAG             0x51535049UL /* 'QSPI' */
 #define QSPI_TEST_DATA_LEN          64U
 #define QSPI_TX_PREFIX              "ECHO:"
 
@@ -98,6 +95,7 @@ static qspi_desc_t          tx_desc[QSPI_QUEUE_SIZE];
 static qspi_stats_t         qspi_stats = {0};
 static QueueHandle_t        qspi_tx_queue = NULL;
 static SemaphoreHandle_t    qspi_stats_mutex = NULL;
+static qspi_reg_read_t      qspi_reg_read = {0};
 
 /*
  * *********************************************************************************************************
@@ -110,11 +108,12 @@ static void     qspi_tx_task(void *parameters);
 static void     qspi_init_gpio(void);
 static void     qspi_init_slave_hd(void);
 static void     qspi_init_descriptors(void);
+static void     qspi_init_shared_regs(void);
 static void     qspi_update_shared_regs(void);
 static uint16_t qspi_crc16(const uint8_t *data, size_t len);
 static size_t   qspi_align4(size_t value);
 static size_t   qspi_prepare_default_tx(uint8_t *out, size_t out_len);
-static size_t   qspi_build_rx_response(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
+static size_t   qspi_build_response(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
 static bool     qspi_cb_buffer_rx(void *arg, spi_slave_hd_event_t *event, int *awoken);
 static bool     qspi_cb_send_dma_ready(void *arg, spi_slave_hd_event_t *event, int *awoken);
 
@@ -135,6 +134,7 @@ void qspi_init(void)
     qspi_init_gpio();
     qspi_init_slave_hd();
     qspi_init_descriptors();
+    qspi_init_shared_regs();
     qspi_update_shared_regs();
 
     xTaskCreate(qspi_rx_task, "qspi_rx_task", 4096, NULL, 5, &qspi_rx_task_handle);
@@ -267,7 +267,7 @@ static void qspi_rx_task(void *parameters)
 
         size_t rx_len = rx_done->trans_len;
         qspi_tx_msg_t msg = {0};
-        msg.len = qspi_build_rx_response(rx_done->data, rx_len, msg.data, sizeof(msg.data));
+        msg.len = qspi_build_response(rx_done->data, rx_len, msg.data, sizeof(msg.data));
 
         xSemaphoreTake(qspi_stats_mutex, portMAX_DELAY);
         qspi_stats.rx_count++;
@@ -332,6 +332,32 @@ static void qspi_tx_task(void *parameters)
 
 /**********************************************************************************************************/
 /**
+ * @brief Initialize the shared registers that the master can read to get status and statistics information.
+ *        This function is called during initialization to set up the initial values.
+ */
+static void qspi_init_shared_regs(void)
+{
+    xSemaphoreTake(qspi_stats_mutex, portMAX_DELAY);
+
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
+
+    qspi_reg_read.chip_id = (uint8_t)chip_info.model;
+    sscanf(PROJECT_VER, "%hhu.%hhu.%hhu", &qspi_reg_read.ver_major, &qspi_reg_read.ver_minor, &qspi_reg_read.ver_patch);
+
+    spi_slave_hd_write_buffer(QSPI_HOST, QSPI_REG_READ_CONST_IDX, (uint8_t *)&qspi_reg_read, sizeof(qspi_reg_read));
+    
+    for (uint32_t i = QSPI_REG_READ_IDX; i < 64; i++)
+    {
+        uint8_t zero_data = 0;
+        spi_slave_hd_write_buffer(QSPI_HOST, i, &zero_data, 1);
+    }
+
+    xSemaphoreGive(qspi_stats_mutex);
+}
+
+/**********************************************************************************************************/
+/**
  * @brief Update the shared registers that the master can read to get status and statistics information.
  *        This function is called after processing transactions to ensure the master has the latest data.
  */
@@ -339,23 +365,13 @@ static void qspi_update_shared_regs(void)
 {
     xSemaphoreTake(qspi_stats_mutex, portMAX_DELAY);
 
-    uint32_t value = QSPI_READY_FLAG;
-    spi_slave_hd_write_buffer(QSPI_HOST, QSPI_REG_READY, (uint8_t *)&value, sizeof(value));
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
 
-    value = qspi_stats.rx_count;
-    spi_slave_hd_write_buffer(QSPI_HOST, QSPI_REG_RX_COUNT, (uint8_t *)&value, sizeof(value));
+    qspi_reg_read.chip_id = (uint8_t)chip_info.model;
+    sscanf(PROJECT_VER, "%hhu.%hhu.%hhu", &qspi_reg_read.ver_major, &qspi_reg_read.ver_minor, &qspi_reg_read.ver_patch);
 
-    value = qspi_stats.tx_count;
-    spi_slave_hd_write_buffer(QSPI_HOST, QSPI_REG_TX_COUNT, (uint8_t *)&value, sizeof(value));
-
-    value = qspi_stats.last_rx_len;
-    spi_slave_hd_write_buffer(QSPI_HOST, QSPI_REG_LAST_RX_LEN, (uint8_t *)&value, sizeof(value));
-
-    value = qspi_stats.last_rx_crc;
-    spi_slave_hd_write_buffer(QSPI_HOST, QSPI_REG_LAST_RX_CRC, (uint8_t *)&value, sizeof(value));
-
-    value = qspi_stats.test_pass;
-    spi_slave_hd_write_buffer(QSPI_HOST, QSPI_REG_TEST_PASS, (uint8_t *)&value, sizeof(value));
+    spi_slave_hd_write_buffer(QSPI_HOST, QSPI_REG_READ_IDX, (uint8_t *)&qspi_reg_read, sizeof(qspi_reg_read));
 
     xSemaphoreGive(qspi_stats_mutex);
 }
@@ -434,7 +450,7 @@ static size_t qspi_prepare_default_tx(uint8_t *out, size_t out_len)
  * @param out_len Length of the output buffer in bytes.
  * @return The length of the prepared response in bytes, or 0 if there was an error.
  */
-static size_t qspi_build_rx_response(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len)
+static size_t qspi_build_response(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len)
 {
     if (out == NULL || out_len == 0)
     {

@@ -1,6 +1,6 @@
-﻿/*
- * @file        qspi.h
- * @brief       WiFi Co-Processor QSPI Transport Layer
+/*
+ * @file        types.h
+ * @brief       WiFi Co-Processor Types
  * @author      Nima Askari
  * @version     0.0.1
  * @license     See the LICENSE file in the root folder.
@@ -17,16 +17,11 @@
  * Copyright (C) 2026 Nima Askari - NimaLTD. All rights reserved.
 */
 
-#ifndef _QSPI_H_
-#define _QSPI_H_
+#ifndef _TYPES_H_
+#define _TYPES_H_
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "types.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*
  * *********************************************************************************************************
@@ -40,28 +35,37 @@ extern "C" {
  * *********************************************************************************************************
 */
 
-typedef struct __attribute__((packed)) 
+enum
 {
-    /* Constant values */
-    uint8_t             chip_id;
-    uint8_t             ver_major;
-    uint8_t             ver_minor;
-    uint8_t             ver_patch; 
-    
-    /* Variable values */
-    uint16_t            rx_len;
-    uint8_t             ap_status;
-    uint8_t             sta_status;
+    TYP_STA_DISABLED            = 0x00,
+    TYP_STA_CONNECTING          = 0x01,
+    TYP_STA_CONNECTED           = 0x02,
+    TYP_STA_DISCONNECTED        = 0x03,
+    TYP_STA_ERROR               = 0xFF,
+};
 
-} qspi_reg_read_t;
-
-/*
- * *********************************************************************************************************
- * Function Prototypes
- * *********************************************************************************************************
-*/
-
-void qspi_init(void);
+enum
+{
+    TYP_AP_DISABLED             = 0x00,
+    TYP_AP_CLIENT_CNT0          = 0x10,
+    TYP_AP_CLIENT_CNT1          = 0x11,
+    TYP_AP_CLIENT_CNT2          = 0x12,
+    TYP_AP_CLIENT_CNT3          = 0x13,
+    TYP_AP_CLIENT_CNT4          = 0x14,
+    TYP_AP_CLIENT_CNT5          = 0x15,
+    TYP_AP_CLIENT_CNT6          = 0x16,
+    TYP_AP_CLIENT_CNT7          = 0x17,
+    TYP_AP_CLIENT_CNT8          = 0x18,
+    TYP_AP_CLIENT_CNT9          = 0x19,
+    TYP_AP_CLIENT_CNT10         = 0x1A,
+    TYP_AP_CLIENT_CNT11         = 0x1B,
+    TYP_AP_CLIENT_CNT12         = 0x1C,
+    TYP_AP_CLIENT_CNT13         = 0x1D,
+    TYP_AP_CLIENT_CNT14         = 0x1E,
+    TYP_AP_CLIENT_CNT15         = 0x1F,
+    TYP_AP_CLIENT_CNT16         = 0x20,
+    TYP_AP_ERROR                = 0xFF,
+};
 
 /*
  * *********************************************************************************************************
@@ -69,8 +73,4 @@ void qspi_init(void);
  * *********************************************************************************************************
 */
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* _QSPI_H */
+#endif /* _TYPES_H_ */
