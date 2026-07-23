@@ -49,7 +49,6 @@ typedef struct __attribute__((packed))
     uint8_t             ver_patch; 
     
     /* Variable values */
-    uint16_t            rx_len;
     uint8_t             ap_status;
     uint8_t             sta_status;
 
